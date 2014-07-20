@@ -4,6 +4,7 @@
 #endif // DEFINITIONS_H
 
 // XXX
+//#define OLD_VERSION
 
 //#define LATEST_VERSION_URL          "http://repos.keepod.org/installer-latest/keepod.iso"
 
@@ -19,12 +20,25 @@
     char a[len] = {0};              \
     memset ( a, 0, len );
 
+#ifdef OLD_VERSION
+
 #define PRG_INIT                    0
 #define PRG_ISO_PREPARED            20
 #define PRG_DRIVE_PREPARED          30
 #define PRG_ISO_EXTRACTED           60
 #define PRG_BOOTLOADER_INSTALLED    90
 #define PRG_FINISHED                100
+
+#else
+
+#define PRG_INIT                    0
+#define PRG_ISO_PREPARED            40
+#define PRG_DRIVE_PREPARED          60
+#define PRG_ISO_EXTRACTED           100
+#define PRG_BOOTLOADER_INSTALLED    100
+#define PRG_FINISHED                100
+
+#endif
 
 
 

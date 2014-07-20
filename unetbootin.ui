@@ -190,7 +190,7 @@ QPushButton:disabled {
         <x>40</x>
         <y>220</y>
         <width>370</width>
-        <height>192</height>
+        <height>171</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -314,6 +314,30 @@ QPushButton:disabled {
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblStatus">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>400</y>
+        <width>371</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Courier New</family>
+        <pointsize>9</pointsize>
+        <italic>true</italic>
+        <kerning>true</kerning>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </widget>

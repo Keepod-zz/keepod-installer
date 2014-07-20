@@ -2891,17 +2891,15 @@ void unetbootin::run()
         return;
     }
 
-    /*ret = taskInfo->disk->keepodFormat();
+#if OLD_VERSION
+    ret = taskInfo->disk->keepodFormat();
     if ( ret == false ) {
         SHOW_MESSAGE (KEEPOD_INSTALLER_TITLE, MSG_REPARTITION_FAILED + QString(": ") + taskInfo->disk->getParentDevname());
         return;
-    }*/
+    }
 
-#if 0
     taskInfo->disk->mount();
 #endif
-
-    emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
 
     installType = tr("USB Drive");
     targetDrive = taskInfo->disk->m_szDevName;
@@ -2996,11 +2994,23 @@ void unetbootin::run()
 		overwritefileprompt(QString("%1ubninit").arg(targetPath));
     }*/
 
-#if 0
+#ifdef OLD_VERSION
+    emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
+
     extractiso ( taskInfo->isoPath );
 #else
-    CNorImagesDiff::clone(taskInfo->isoPath.toLocal8Bit().data(),
-                          taskInfo->disk->m_szDevName.toLocal8Bit().data());
+    QString szDev = taskInfo->disk->getParentDevname();
+    int nSteps = CNorImagesDiff::cloneStep(taskInfo->isoPath.toLocal8Bit().data(),
+                                       szDev.toLocal8Bit().data());
+
+    emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
+
+    int nCurStep;
+    while ( (nCurStep = CNorImagesDiff::cloneStep(NULL, szDev.toLocal8Bit().data())) ) {
+        int nNewProgress = PRG_DRIVE_PREPARED+(PRG_ISO_EXTRACTED-PRG_DRIVE_PREPARED)*nCurStep/nSteps;
+
+        emit progress(taskInfo->diskIdOnUI, nNewProgress);
+    }
 #endif
 
     emit progress(taskInfo->diskIdOnUI, PRG_ISO_EXTRACTED);
@@ -3014,7 +3024,9 @@ void unetbootin::run()
 		}
 	}
 
+#ifdef OLD_VERSION
 	instDetType();
+#endif
 }
 
 void unetbootin::instDetType()

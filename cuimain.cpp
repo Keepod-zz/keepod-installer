@@ -27,7 +27,7 @@ void CUIMain::customizeUI()
     QStandardItemModel *model = new QStandardItemModel(0,4,this);
 
     model->setHorizontalHeaderItem(TABLE_COLUMN_CHECK, new QStandardItem(QString("")));
-    model->setHorizontalHeaderItem(TABLE_COLUMN_LABEL, new QStandardItem(QString("Label/Drives")));
+    model->setHorizontalHeaderItem(TABLE_COLUMN_LABEL, new QStandardItem(QString("Drives")));
     model->setHorizontalHeaderItem(TABLE_COLUMN_PROGRESS, new QStandardItem(QString("Progress")));
     model->setHorizontalHeaderItem(TABLE_COLUMN_MOREINFO, new QStandardItem(QString("")));
 
@@ -42,8 +42,8 @@ void CUIMain::customizeUI()
     hzHeader->setClickable(false);
     hzHeader->setMovable(false);
     hzHeader->resizeSection(TABLE_COLUMN_CHECK, 25);
-    hzHeader->resizeSection(TABLE_COLUMN_LABEL, 220);
-    hzHeader->resizeSection(TABLE_COLUMN_PROGRESS, 100);
+    hzHeader->resizeSection(TABLE_COLUMN_LABEL, 120);
+    hzHeader->resizeSection(TABLE_COLUMN_PROGRESS, 200);
     hzHeader->resizeSection(TABLE_COLUMN_MOREINFO, 24);
 
     QHeaderView *vtHeader = tblDevices->verticalHeader();
@@ -172,6 +172,7 @@ bool CUIMain::runInstallTasks()
     QString md5tmpf = unetbootin::ubntmpf + LATEST_VERSION_MD5_NAME;
 //    QString isotmpf = randtmpfile::getrandfilename(unetbootin::ubntmpf, "iso");
 
+    m_statusManager.setStatus(STAT_BASE, lblStatus);
     // Set initial progress
     for ( int i=0; i<selcount; i++ ) {
         onProgressUpdate ( selIds.at(i), PRG_INIT );
@@ -179,20 +180,23 @@ bool CUIMain::runInstallTasks()
 
     // Try downloading
     if ( m_bDownloadLatest == true ) {
+        m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus);
+
         ret = unetbootin::downloadfile ( LATEST_VERSION_MD5, md5tmpf );
         ret = ret && unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf );
 
         if ( ret == false ) {
-            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_DOWNLOAD_FAILED+QString(": ")+LATEST_VERSION_URL );
+            m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
             return false;
         }
 
+        m_statusManager.setStatus(STAT_CHECKING_MD5SUM, lblStatus);
         // check for md5 checksum.
         QDir::setCurrent(unetbootin::ubntmpf);
         QString md5cmdparam = QString("-c ") + LATEST_VERSION_MD5_NAME;
         QString cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
         if ( cmdres.contains("OK") == FALSE ) {
-            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_MD5_MISMATCH );
+            m_statusManager.setStatus(ERR_MD5_MISMATCH, lblStatus);
             return false;
         }
 
@@ -201,13 +205,18 @@ bool CUIMain::runInstallTasks()
         if ( m_szIsoPath.startsWith("http://") || m_szIsoPath.startsWith("ftp://") ) {
             ret = unetbootin::downloadfile ( m_szIsoPath, isotmpf );
             if ( ret == false ) {
-                SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_DOWNLOAD_FAILED+QString(": ")+m_szIsoPath );
+                QString szNewMsg = MSG_DOWNLOADING_USER;
+
+                szNewMsg.arg(m_szIsoPath);
+                m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus, szNewMsg);
                 return false;
             }
 
             m_szIsoPath = isotmpf;
         }
     }
+
+    m_statusManager.setStatus(STAT_WRITING, lblStatus);
 
     // Once the keepod iso file prepared, begin to install.
     int i;
@@ -277,6 +286,7 @@ void CUIMain::closeEvent (QCloseEvent *event)
 
 void CUIMain::on_btnStart_clicked()
 {
+#ifdef OLD_VERSION
     // Check if grub-0.97 installed
     if ( unetbootin::checkGrub1Installed() == false ) {
         QMessageBox msgbGrub;
@@ -287,7 +297,8 @@ void CUIMain::on_btnStart_clicked()
         msgbGrub.setStandardButtons(QMessageBox::No|QMessageBox::Yes);
 
         if ( msgbGrub.exec() == QMessageBox::Yes ) {
-            SHOW_MESSAGE (KEEPOD_INSTALLER_TITLE, MSG_GRUB_WAIT);
+            m_statusManager.setStatus(STAT_INSTALLING_GRUB, lblStatus);
+
             setMode(false);
             unetbootin::callexternapp("apt-get", "install grub");
             setMode(true);
@@ -295,6 +306,7 @@ void CUIMain::on_btnStart_clicked()
             return;
         }
     }
+#endif
 
     // Confirm format
     if ( btnStart->text() == tr("Cancel") ) {
@@ -405,7 +417,7 @@ void CUIMain::onThreadFinished()
     }
 
     if ( m_nRunningTaskCount <= 0 ) {
-        SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_COMPLETED );
+        m_statusManager.setStatus(STAT_DONE, lblStatus);
         setMode ( true );
     }
 

@@ -12,7 +12,8 @@ HEADERS += unetbootin.h \
     cnorimagesdiff.h \
     cusbdiskinfo.h \
     cuimain.h \
-    cnorchangedblocks.h
+    cnorchangedblocks.h \
+    cstatusmanager.h
 FORMS += unetbootin.ui
 SOURCES += main.cpp \
     unetbootin.cpp \
@@ -21,7 +22,8 @@ SOURCES += main.cpp \
     cnorimagesdiff.cpp \
     cusbdiskinfo.cpp \
     cuimain.cpp \
-    cnorchangedblocks.cpp
+    cnorchangedblocks.cpp \
+    cstatusmanager.cpp
 QT += core \
     gui \
     network

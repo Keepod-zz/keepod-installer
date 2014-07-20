@@ -3,6 +3,7 @@
 
 #include "unetbootin.h"
 #include "cusbdiskinfo.h"
+#include "cstatusmanager.h"
 
 #define TABLE_COLUMN_CHECK          0
 #define TABLE_COLUMN_LABEL          1
@@ -29,6 +30,8 @@ public:
     bool m_bDownloadLatest;
     QString m_szIsoPath;
     bool m_bStopFlag;
+
+    CStatusManager m_statusManager;
 
     void customizeUI();
     void refreshDiskTable ();
