@@ -109,6 +109,8 @@ QString CUsbDiskInfo::mount () {
 }
 
 QString CUsbDiskInfo::getShowableName () {
+#if 0
+
     QString newLabel;
 
     if ( m_szLabel.isEmpty() ) {
@@ -120,6 +122,12 @@ QString CUsbDiskInfo::getShowableName () {
     }
 
     return newLabel + QString(" (") + m_szDevName + QString(")");
+
+#else
+
+    return getParentDevname();
+
+#endif
 }
 
 QString CUsbDiskInfo::getDevNodeName () {

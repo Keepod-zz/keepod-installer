@@ -2158,12 +2158,17 @@ bool unetbootin::downloadfile(QString fileurl, QString targetfile, int minsize, 
             return downloadfile(redirectTargetURL, targetfile, minsize);
         }
     }
+
+    // for downloading 'md5sum.txt'
+#if 0
 	if (QFile(targetfile).size() < minsize)
 	{
 		// download failed
 //		showDownloadFailedScreen(fileurl);
         return false;
 	}
+#endif
+
 //	pdesc4->setText("");
 //	pdesc3->setText("");
 //	pdesc2->setText("");

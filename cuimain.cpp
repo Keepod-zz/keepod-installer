@@ -167,7 +167,10 @@ bool CUIMain::runInstallTasks()
     m_bDownloadLatest = (chkDownloadLatest->checkState() == Qt::Checked);
     m_szIsoPath = edtISOPath->text();
     bool ret = false;
-    QString isotmpf = randtmpfile::getrandfilename(unetbootin::ubntmpf, "iso");
+
+    QString isotmpf = unetbootin::ubntmpf + LATEST_VERSION_URL_NAME;
+    QString md5tmpf = unetbootin::ubntmpf + LATEST_VERSION_MD5_NAME;
+//    QString isotmpf = randtmpfile::getrandfilename(unetbootin::ubntmpf, "iso");
 
     // Set initial progress
     for ( int i=0; i<selcount; i++ ) {
@@ -176,9 +179,20 @@ bool CUIMain::runInstallTasks()
 
     // Try downloading
     if ( m_bDownloadLatest == true ) {
-        ret = unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf );
+        ret = unetbootin::downloadfile ( LATEST_VERSION_MD5, md5tmpf );
+        ret = ret && unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf );
+
         if ( ret == false ) {
             SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_DOWNLOAD_FAILED+QString(": ")+LATEST_VERSION_URL );
+            return false;
+        }
+
+        // check for md5 checksum.
+        QDir::setCurrent(unetbootin::ubntmpf);
+        QString md5cmdparam = QString("-c ") + LATEST_VERSION_MD5_NAME;
+        QString cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
+        if ( cmdres.contains("OK") == FALSE ) {
+            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_MD5_MISMATCH );
             return false;
         }
 

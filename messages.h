@@ -6,6 +6,7 @@
 #define MSG_NO_SOURCE_ISO               "Please input/select the path to the Keepod iso file."
 #define MSG_FILE_NOT_FOUND              "The specified iso file does not exist"
 #define MSG_DOWNLOAD_FAILED             "Failed to download"
+#define MSG_MD5_MISMATCH                "The downloaded file is corrupted. Please try again."
 #define MSG_UMOUNT_FAILED               "Failed to unmount"
 #define MSG_REPARTITION_FAILED          "Failed to repartition"
 
