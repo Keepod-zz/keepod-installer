@@ -182,8 +182,8 @@ bool CUIMain::runInstallTasks()
     if ( m_bDownloadLatest == true ) {
         m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus);
 
-        ret = unetbootin::downloadfile ( LATEST_VERSION_MD5, md5tmpf );
-        ret = ret && unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf );
+        ret = unetbootin::downloadfile ( LATEST_VERSION_MD5, md5tmpf, 0, this );
+        ret = ret && unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf, 0, this );
 
         if ( ret == false ) {
             m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
