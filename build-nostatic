@@ -15,7 +15,7 @@ rm release/*
 cp unetbootin.pro unetbootin-pro.bak
 sed -i '/^RESOURCES/d' unetbootin.pro
 lrelease-qt4 unetbootin.pro
-qmake-qt4 -config release "DEFINES += NOSTATIC" "RESOURCES -= unetbootin.qrc"
+qmake-qt4 -config release "DEFINES += NOSTATIC" "RESOURCES += keepodinstaller.qrc"
 make
 mv unetbootin-pro.bak unetbootin.pro
 strip --strip-all unetbootin
