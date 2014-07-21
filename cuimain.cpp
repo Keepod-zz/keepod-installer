@@ -467,7 +467,7 @@ void CUIMain::dlprogressupdate(int dlbytes, int maxbytes)
 
       // Show the download progress as percentage.
       QString szMsg;
-      szMsg.sprintf("%s %.2f%%", MSG_DOWNLOADING, (float)dlbytes/maxbytes);
+      szMsg.sprintf("%s %.2f%%", MSG_DOWNLOADING, (float)dlbytes/maxbytes*100.0);
       m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus, szMsg);
 
       //  tprogress->setValue(dlbytes);
