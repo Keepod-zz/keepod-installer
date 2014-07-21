@@ -8,9 +8,9 @@
 
 //#define LATEST_VERSION_URL          "http://repos.keepod.org/installer-latest/keepod.iso"
 
-#define LATEST_VERSION_URL          "http://li515-234.members.linode.com/release/real-test1.zip"
+#define LATEST_VERSION_URL          "http://li515-234.members.linode.com/release/keepod-latest.zip"
 #define LATEST_VERSION_MD5          "http://li515-234.members.linode.com/release/md5sum.txt"
-#define LATEST_VERSION_URL_NAME          "real-test1.zip"
+#define LATEST_VERSION_URL_NAME          "keepod-latest.zip"
 #define LATEST_VERSION_MD5_NAME          "md5sum.txt"
 
 
