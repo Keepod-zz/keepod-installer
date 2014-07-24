@@ -8,6 +8,7 @@ typedef struct {
     quint64  start;
     quint64  end;
     char     name[256];
+    char     md5[256];
 } STChangedFileInfo;
 
 #define CHANGED_INDEX_FILE      "changed.index"

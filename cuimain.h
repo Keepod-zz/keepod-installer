@@ -52,9 +52,12 @@ public slots:
 
     void on_tblDevices_clicked(const QModelIndex &index);
     void on_chkDownloadLatest_stateChanged(int arg1);
+
     void onThreadFinished();
     void onThreadTerminated();
+
     void onProgressUpdate(int itemId, int prg);
+    void onTaskFailed ( int itemId, ENStatus err );
 
     void on_btnStart_clicked();
 

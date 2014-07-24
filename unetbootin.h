@@ -21,6 +21,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 #include "definitions.h"
 #include "installtaskinfo.h"
+#include "cstatusmanager.h"
 
 
 
@@ -267,6 +268,7 @@ public slots:
 
 signals:
     void progress(int id, int prg);
+    void failed(int id, ENStatus err );
 };
 
 #endif

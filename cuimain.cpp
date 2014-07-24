@@ -182,22 +182,32 @@ bool CUIMain::runInstallTasks()
     if ( m_bDownloadLatest == true ) {
         m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus);
 
+        // download the md5 file first.
         ret = unetbootin::downloadfile ( LATEST_VERSION_MD5, md5tmpf, 0, this );
-        ret = ret && unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf, 0, this );
-
         if ( ret == false ) {
             m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
             return false;
         }
 
-        m_statusManager.setStatus(STAT_CHECKING_MD5SUM, lblStatus);
-        // check for md5 checksum.
+        // check for md5 checksum before download
         QDir::setCurrent(unetbootin::ubntmpf);
         QString md5cmdparam = QString("-c ") + LATEST_VERSION_MD5_NAME;
         QString cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
         if ( cmdres.contains("OK") == FALSE ) {
-            m_statusManager.setStatus(ERR_MD5_MISMATCH, lblStatus);
-            return false;
+            ret = unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf, 0, this );
+            if ( ret == false ) {
+                m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
+                return false;
+            }
+
+            m_statusManager.setStatus(STAT_CHECKING_MD5SUM, lblStatus);
+
+            // check for md5 checksum again after download.
+            cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
+            if ( cmdres.contains("OK") == FALSE ) {
+                m_statusManager.setStatus(ERR_MD5_MISMATCH, lblStatus);
+                return false;
+            }
         }
 
         m_szIsoPath = isotmpf;
@@ -235,7 +245,10 @@ bool CUIMain::runInstallTasks()
 
         // run a installation task
         m_aInstallTasks[i] = new unetbootin(taskInfo);
+
         connect (m_aInstallTasks[i], SIGNAL(progress(int,int)), this, SLOT(onProgressUpdate(int,int)));
+        connect (m_aInstallTasks[i], SIGNAL(failed(int,ENStatus)), this, SLOT(onTaskFailed(int,ENStatus)));
+
         connect (m_aInstallTasks[i], SIGNAL(finished()), this, SLOT(onThreadFinished()));
         connect (m_aInstallTasks[i], SIGNAL(terminated()), this, SLOT(onThreadTerminated()));
         m_aInstallTasks[i]->start();
@@ -445,6 +458,11 @@ void CUIMain::onProgressUpdate(int itemId, int prg)
 
 
     ////prgItem->setText(QString::number(progress));
+}
+
+void CUIMain::onTaskFailed ( int itemId, ENStatus err )
+{
+    m_statusManager.setStatus(err, lblStatus);
 }
 
 void CUIMain::dlprogressupdate(int dlbytes, int maxbytes)

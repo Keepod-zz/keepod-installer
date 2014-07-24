@@ -101,13 +101,15 @@ STChangedFileInfo** CNorChangedBlocks::extract ( int *o_nItemCount )
             }
         }
 
-        // if the comma count is not 2, the string is not correct certainly, skip it.
-        if ( nCommaCount != 2 ) {
+        // if the comma count is not 3, the string is not correct certainly, skip it.
+        if ( nCommaCount != 3 ) {
             continue;
         }
 
         STChangedFileInfo *stNewCFInfo = (STChangedFileInfo*) malloc (sizeof(STChangedFileInfo));
-        sscanf ( pBuf, "%llu %llu %s", &(stNewCFInfo->start), &(stNewCFInfo->end), stNewCFInfo->name );
+        sscanf ( pBuf, "%llu %llu %s %s", &(stNewCFInfo->start),
+                 &(stNewCFInfo->end), stNewCFInfo->name,
+                 stNewCFInfo->md5);
         aCFInfos[nItemCount] = stNewCFInfo;
 
         nItemCount ++;
