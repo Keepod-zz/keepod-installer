@@ -57,7 +57,7 @@ public slots:
     void onThreadTerminated();
 
     void onProgressUpdate(int itemId, int prg);
-    void onTaskFailed ( int itemId, ENStatus err );
+    void onTaskFailed ( int itemId, int err );
 
     void on_btnStart_clicked();
 

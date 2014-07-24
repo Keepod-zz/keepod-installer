@@ -268,7 +268,7 @@ public slots:
 
 signals:
     void progress(int id, int prg);
-    void failed(int id, ENStatus err );
+    void failed(int id, int err );
 };
 
 #endif

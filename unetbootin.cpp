@@ -131,9 +131,14 @@ void callexternappT::run()
 	#endif
 	#ifdef Q_OS_UNIX
 	QProcess lnexternapp;
+
+    // Wow, wonderful! Don't forget this.
+    lnexternapp.setProcessChannelMode(QProcess::MergedChannels);
+
     lnexternapp.start("\"" + execFile + "\" " + execParm);
-	lnexternapp.waitForFinished(-1);
-	retnValu = QString(lnexternapp.readAll());
+    lnexternapp.waitForFinished(-1);
+    retnValu = QString(lnexternapp.readAll());
+
 	#endif
 }
 
@@ -3000,16 +3005,26 @@ void unetbootin::run()
     extractiso ( taskInfo->isoPath );
 #else
     QString szDev = taskInfo->disk->getParentDevname();
-    int nSteps = CNorImagesDiff::cloneStep(taskInfo->isoPath.toLocal8Bit().data(),
-                                       szDev.toLocal8Bit().data());
+    int nSteps = CNorImagesDiff::prepareClone(taskInfo->isoPath.toLocal8Bit().data());
 
-    emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
+    if ( nSteps > 0 ) {
+        emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
 
-    int nCurStep;
-    while ( (nCurStep = CNorImagesDiff::cloneStep(NULL, szDev.toLocal8Bit().data())) ) {
-        int nNewProgress = PRG_DRIVE_PREPARED+(PRG_ISO_EXTRACTED-PRG_DRIVE_PREPARED)*nCurStep/nSteps;
+        int nCurStep;
+        while ( (nCurStep = CNorImagesDiff::cloneStep(szDev.toLocal8Bit().data())) > 0 ) {
+            int nNewProgress = PRG_DRIVE_PREPARED+(PRG_ISO_EXTRACTED-PRG_DRIVE_PREPARED)*nCurStep/nSteps;
 
-        emit progress(taskInfo->diskIdOnUI, nNewProgress);
+            emit progress(taskInfo->diskIdOnUI, nNewProgress);
+        }
+
+        // check if exit is due to the failure.
+        if ( nCurStep != 0 ) {
+            emit failed(taskInfo->diskIdOnUI, ERR_WRITE_FAILED);
+            return;
+        }
+    } else {
+        emit failed(taskInfo->diskIdOnUI, ERR_WRITE_FAILED);
+        return;
     }
 #endif
 

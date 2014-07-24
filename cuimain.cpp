@@ -247,7 +247,7 @@ bool CUIMain::runInstallTasks()
         m_aInstallTasks[i] = new unetbootin(taskInfo);
 
         connect (m_aInstallTasks[i], SIGNAL(progress(int,int)), this, SLOT(onProgressUpdate(int,int)));
-        connect (m_aInstallTasks[i], SIGNAL(failed(int,ENStatus)), this, SLOT(onTaskFailed(int,ENStatus)));
+        connect (m_aInstallTasks[i], SIGNAL(failed(int,int)), this, SLOT(onTaskFailed(int,int)));
 
         connect (m_aInstallTasks[i], SIGNAL(finished()), this, SLOT(onThreadFinished()));
         connect (m_aInstallTasks[i], SIGNAL(terminated()), this, SLOT(onThreadTerminated()));
@@ -460,9 +460,9 @@ void CUIMain::onProgressUpdate(int itemId, int prg)
     ////prgItem->setText(QString::number(progress));
 }
 
-void CUIMain::onTaskFailed ( int itemId, ENStatus err )
+void CUIMain::onTaskFailed ( int itemId, int err )
 {
-    m_statusManager.setStatus(err, lblStatus);
+    m_statusManager.setStatus((ENStatus)err, lblStatus);
 }
 
 void CUIMain::dlprogressupdate(int dlbytes, int maxbytes)
