@@ -8,10 +8,13 @@
 
 //#define LATEST_VERSION_URL          "http://repos.keepod.org/installer-latest/keepod.iso"
 
-#define LATEST_VERSION_URL          "http://li515-234.members.linode.com/release/keepod-latest.zip"
-#define LATEST_VERSION_MD5          "http://li515-234.members.linode.com/release/md5sum.txt"
+//#define LATEST_VERSION_URL_BASE     "http://li515-234.members.linode.com/release/"
+#define LATEST_VERSION_URL_BASE     "ftp://122.143.5.142/pub/keepod/"
 #define LATEST_VERSION_URL_NAME          "keepod-latest.zip"
 #define LATEST_VERSION_MD5_NAME          "md5sum.txt"
+
+#define LATEST_VERSION_URL          LATEST_VERSION_URL_BASE LATEST_VERSION_URL_NAME
+#define LATEST_VERSION_MD5          LATEST_VERSION_URL_BASE LATEST_VERSION_MD5_NAME
 
 
 #define TEMPDIR                     "/opt/keepodin"
@@ -32,10 +35,14 @@
 #else
 
 #define PRG_INIT                    0
+// downloaded
 #define PRG_ISO_PREPARED            40
-#define PRG_DRIVE_PREPARED          60
-#define PRG_ISO_EXTRACTED           100
-#define PRG_BOOTLOADER_INSTALLED    100
+// md5 check success
+#define PRG_DRIVE_PREPARED          50
+// zip extracted
+#define PRG_ISO_EXTRACTED           60
+#define PRG_BOOTLOADER_INSTALLED    60
+// writed
 #define PRG_FINISHED                100
 
 #endif

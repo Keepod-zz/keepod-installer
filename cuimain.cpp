@@ -1,7 +1,7 @@
 #include "cuimain.h"
 #include "customitemdelegate.h"
+#include "cnorchangedblocks.h"
 #include "definitions.h"
-
 #include "messages.h"
 
 CUIMain::CUIMain(QWidget *parent)
@@ -163,10 +163,13 @@ bool CUIMain::runInstallTasks()
 {
     QList<int> selIds = getSelectedIds();
     int selcount = selIds.size();
+    int i;
 
     m_bDownloadLatest = (chkDownloadLatest->checkState() == Qt::Checked);
-    m_szIsoPath = edtISOPath->text();
+    QString szIsoUrl = edtISOPath->text();
     bool ret = false;
+
+    m_szIsoPath = "";
 
     QString isotmpf = unetbootin::ubntmpf + LATEST_VERSION_URL_NAME;
     QString md5tmpf = unetbootin::ubntmpf + LATEST_VERSION_MD5_NAME;
@@ -174,10 +177,13 @@ bool CUIMain::runInstallTasks()
 
     m_statusManager.setStatus(STAT_BASE, lblStatus);
     // Set initial progress
-    for ( int i=0; i<selcount; i++ ) {
+    for ( i=0; i<selcount; i++ ) {
         onProgressUpdate ( selIds.at(i), PRG_INIT );
     }
 
+    QDir::setCurrent(unetbootin::ubntmpf);
+    QString md5cmdparam = QString("-c ") + LATEST_VERSION_MD5_NAME;
+    QString cmdres;
     // Try downloading
     if ( m_bDownloadLatest == true ) {
         m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus);
@@ -189,52 +195,80 @@ bool CUIMain::runInstallTasks()
             return false;
         }
 
-        // check for md5 checksum before download
-        QDir::setCurrent(unetbootin::ubntmpf);
-        QString md5cmdparam = QString("-c ") + LATEST_VERSION_MD5_NAME;
-        QString cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
+        cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
+
         if ( cmdres.contains("OK") == FALSE ) {
             ret = unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf, 0, this );
             if ( ret == false ) {
                 m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
                 return false;
             }
-
-            m_statusManager.setStatus(STAT_CHECKING_MD5SUM, lblStatus);
-
-            // check for md5 checksum again after download.
-            cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
-            if ( cmdres.contains("OK") == FALSE ) {
-                m_statusManager.setStatus(ERR_MD5_MISMATCH, lblStatus);
-                return false;
-            }
         }
 
         m_szIsoPath = isotmpf;
     } else {
-        if ( m_szIsoPath.startsWith("http://") || m_szIsoPath.startsWith("ftp://") ) {
-            ret = unetbootin::downloadfile ( m_szIsoPath, isotmpf );
+        if ( szIsoUrl.startsWith("http://") || szIsoUrl.startsWith("ftp://") ) {
+            ret = unetbootin::downloadfile ( szIsoUrl, isotmpf );
             if ( ret == false ) {
                 QString szNewMsg = MSG_DOWNLOADING_USER;
 
-                szNewMsg.arg(m_szIsoPath);
+                szNewMsg.arg(szIsoUrl);
                 m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus, szNewMsg);
                 return false;
             }
 
             m_szIsoPath = isotmpf;
+        } else {
+            m_szIsoPath = szIsoUrl;
         }
     }
+
+    for ( i=0; i<selcount; i++ ) {
+        int diskId = selIds.at(i);
+        onProgressUpdate ( diskId, PRG_ISO_PREPARED );
+    }
+
+
+
+    if ( m_szIsoPath.compare(szIsoUrl) != 0 ) {
+        // if the iso file is a downloaded one, check md5sum
+        // check for md5 checksum before download
+
+        m_statusManager.setStatus(STAT_CHECKING_MD5SUM, lblStatus);
+
+        // check for md5 checksum again after download.
+        cmdres = unetbootin::callexternapp("md5sum", md5cmdparam);
+        if ( cmdres.contains("OK") == FALSE ) {
+            m_statusManager.setStatus(ERR_MD5_MISMATCH, lblStatus);
+            return false;
+        }
+    }
+
+    for ( i=0; i<selcount; i++ ) {
+        int diskId = selIds.at(i);
+        onProgressUpdate ( diskId, PRG_DRIVE_PREPARED );
+    }
+
+
+
+    m_statusManager.setStatus(STAT_EXTRACTING, lblStatus);
+
+    CNorChangedBlocks::prepareClone(m_szIsoPath.toLocal8Bit().data());
+
+    for ( i=0; i<selcount; i++ ) {
+        int diskId = selIds.at(i);
+        onProgressUpdate ( diskId, PRG_ISO_EXTRACTED );
+    }
+
+
 
     m_statusManager.setStatus(STAT_WRITING, lblStatus);
 
     // Once the keepod iso file prepared, begin to install.
-    int i;
     m_aInstallTasks = (unetbootin**) malloc(sizeof(unetbootin)*selcount);
     m_nRunningTaskCount = selcount;
     for ( i=0; i<selcount; i++ ) {
         int diskId = selIds.at(i);
-        onProgressUpdate ( diskId, PRG_ISO_PREPARED );
 
         // prepare the task info
         InstallTaskInfo *taskInfo = new InstallTaskInfo();
@@ -432,6 +466,8 @@ void CUIMain::onThreadFinished()
     if ( m_nRunningTaskCount <= 0 ) {
         m_statusManager.setStatus(STAT_DONE, lblStatus);
         setMode ( true );
+
+        CNorChangedBlocks::finalize();
     }
 
     //printf("exitstatus:success\n");

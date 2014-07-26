@@ -5,35 +5,15 @@
 
 #define BLOCK_SIZE         1024
 
-int CNorImagesDiff::s_nCurStep = 0;
-int CNorImagesDiff::s_nStepCount = 0;
-STChangedFileInfo **CNorImagesDiff::s_aCFInfos = NULL;
-
 CNorImagesDiff::CNorImagesDiff(QObject *parent) :
     QObject(parent)
 {
+    m_nCurStep = 0;
+    m_nStepCount = CNorChangedBlocks::s_nStepCount;
+    m_aCFInfos = CNorChangedBlocks::s_aCFInfos;
 }
 
-// unzip the given file, extract block infos from it.
-// Return: extracted count
-//         0: error, no extracted blocks
-//         n: ...
-int CNorImagesDiff::prepareClone ( const char *i_szSrcZip )
-{
-    if ( i_szSrcZip == NULL ) {
-        return 0;
-    }
 
-    CNorChangedBlocks::unzip(i_szSrcZip);
-
-    s_aCFInfos = CNorChangedBlocks::extract(&s_nStepCount);
-    if ( s_aCFInfos == NULL ) {
-        return 0;
-    }
-
-    s_nCurStep = 0;
-    return s_nStepCount;
-}
 
 int CNorImagesDiff::cloneStep ( const char *i_szDstDev )
 {
@@ -57,26 +37,19 @@ int CNorImagesDiff::cloneStep ( const char *i_szDstDev )
 int CNorImagesDiff::__cloneStep ( const char *i_szDstDev )
 {
     // check parameters
-    if ( i_szDstDev==NULL || s_aCFInfos==NULL ) {
+    if ( i_szDstDev==NULL || m_aCFInfos==NULL ) {
         return -1;
     }
 
-    if ( s_nCurStep == s_nStepCount ) {
-        // remove data
-        for ( int i=0; i<s_nStepCount; i++ ) {
-            free ( s_aCFInfos[i] );
-        }
-
-        free ( s_aCFInfos );
-
-        s_nCurStep = 0;
-        s_nStepCount = 0;
+    if ( m_nCurStep == m_nStepCount ) {
+        m_nCurStep = 0;
+        m_nStepCount = 0;
 
         // all steps have done.
         return 0;
     }
 
-    STChangedFileInfo *pCurCFInfo = s_aCFInfos[s_nCurStep];
+    STChangedFileInfo *pCurCFInfo = m_aCFInfos[m_nCurStep];
 
     // call dd
     DEFINE_STRING(szDDParam, 256);
@@ -100,12 +73,12 @@ int CNorImagesDiff::__cloneStep ( const char *i_szDstDev )
 
     QString szCmdRes = unetbootin::callexternapp("dcfldd", szDcflddParam);
     if ( szCmdRes.contains(pCurCFInfo->md5) ) {
-        s_nCurStep ++;
+        m_nCurStep ++;
     } else {
         return -1;
     }
 
-    return s_nCurStep;
+    return m_nCurStep;
 }
 
 

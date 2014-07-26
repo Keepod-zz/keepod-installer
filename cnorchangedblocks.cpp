@@ -3,6 +3,8 @@
 #include "unetbootin.h"
 
 int CNorChangedBlocks::s_nExtractedCount = 0;
+STChangedFileInfo **CNorChangedBlocks::s_aCFInfos = NULL;
+int CNorChangedBlocks::s_nStepCount = 0;
 
 CNorChangedBlocks::CNorChangedBlocks(QObject *parent) :
     QObject(parent)
@@ -132,4 +134,40 @@ STChangedFileInfo** CNorChangedBlocks::extract ( int *o_nItemCount )
     }
 
     return aCFInfos;
+}
+
+// unzip the given file, extract block infos from it.
+// Return: extracted count
+//         0: error, no extracted blocks
+//         n: ...
+int CNorChangedBlocks::prepareClone ( const char *i_szSrcZip )
+{
+    if ( i_szSrcZip == NULL ) {
+        return 0;
+    }
+
+    unzip(i_szSrcZip);
+
+    s_aCFInfos = extract(&s_nStepCount);
+    if ( s_aCFInfos == NULL ) {
+        return 0;
+    }
+
+    return s_nStepCount;
+}
+
+void CNorChangedBlocks::finalize( void )
+{
+    if ( s_nStepCount > 0 ) {
+        // remove data
+        for ( int i=0; i<s_nStepCount; i++ ) {
+            free ( s_aCFInfos[i] );
+        }
+
+        free ( s_aCFInfos );
+
+        s_aCFInfos = NULL;
+        s_nStepCount = 0;
+        s_nExtractedCount = 0;
+    }
 }

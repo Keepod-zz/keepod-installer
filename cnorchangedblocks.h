@@ -21,10 +21,19 @@ class CNorChangedBlocks : public QObject
 private:
     static int s_nExtractedCount;
 
+public:
+    static STChangedFileInfo **s_aCFInfos;
+    static int s_nStepCount;
+
 
 public:
     explicit CNorChangedBlocks(QObject *parent = 0);
 
+    static int prepareClone ( const char *i_szSrcZip );
+
+    static void finalize ( void );
+
+private:
     // extract the given file into the current directory.
     static void unzip ( QString i_szFileName );
 

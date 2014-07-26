@@ -3003,16 +3003,15 @@ void unetbootin::run()
     emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
 
     extractiso ( taskInfo->isoPath );
+
+    emit progress(taskInfo->diskIdOnUI, PRG_ISO_EXTRACTED);
 #else
     QString szDev = taskInfo->disk->getParentDevname();
-    int nSteps = CNorImagesDiff::prepareClone(taskInfo->isoPath.toLocal8Bit().data());
 
-    if ( nSteps > 0 ) {
-        emit progress(taskInfo->diskIdOnUI, PRG_DRIVE_PREPARED);
-
+    if ( CNorChangedBlocks::s_nStepCount > 0 ) {
         int nCurStep;
-        while ( (nCurStep = CNorImagesDiff::cloneStep(szDev.toLocal8Bit().data())) > 0 ) {
-            int nNewProgress = PRG_DRIVE_PREPARED+(PRG_ISO_EXTRACTED-PRG_DRIVE_PREPARED)*nCurStep/nSteps;
+        while ( (nCurStep = norImagesDiff.cloneStep(szDev.toLocal8Bit().data())) > 0 ) {
+            int nNewProgress = PRG_ISO_EXTRACTED+(PRG_FINISHED-PRG_ISO_EXTRACTED)*nCurStep/CNorChangedBlocks::s_nStepCount;
 
             emit progress(taskInfo->diskIdOnUI, nNewProgress);
         }
@@ -3022,13 +3021,13 @@ void unetbootin::run()
             emit failed(taskInfo->diskIdOnUI, ERR_WRITE_FAILED);
             return;
         }
+
+        emit progress(taskInfo->diskIdOnUI, PRG_FINISHED);
     } else {
         emit failed(taskInfo->diskIdOnUI, ERR_WRITE_FAILED);
         return;
     }
 #endif
-
-    emit progress(taskInfo->diskIdOnUI, PRG_ISO_EXTRACTED);
 
 	if (this->persistenceSpaceMB > 0 && !issalt)
 	{

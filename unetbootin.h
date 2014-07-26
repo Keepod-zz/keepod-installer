@@ -22,6 +22,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 #include "definitions.h"
 #include "installtaskinfo.h"
 #include "cstatusmanager.h"
+#include "cnorimagesdiff.h"
 
 
 
@@ -164,6 +165,7 @@ public:
 
     InstallTaskInfo  *taskInfo;
 
+    CNorImagesDiff  norImagesDiff;
     static bool checkGrub1Installed ();
 
     static bool ubninitialize(/*QList<QPair<QString, QString> > oppairs*/);
