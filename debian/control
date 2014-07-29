@@ -1,30 +1,26 @@
-Source: unetbootin
+Source: keepod-installer
 Section: utils
 Priority: optional
-Maintainer: Muneeb Shaikh <iammuneeb@gmail.com>
-Uploaders: Geza Kovacs <geza0kovacs@gmail.com>
+Maintainer: Norman Jin <norman@keepod.com>
+Uploaders: Norman Jin <norman@keepod.com>
 Build-Depends: debhelper (>= 7), libqt4-dev, syslinux
-Standards-Version: 3.9.4
-Vcs-Git: git://git.debian.org/git/collab-maint/unetbootin.git
-Vcs-Browser: http://git.debian.org/?p=collab-maint/unetbootin.git;a=summary
-Homepage: http://unetbootin.sourceforge.net
+Standards-Version: 1.0.0 
+Vcs-Git: https://github.com/Keepod/keepod-installer.git 
+Vcs-Browser: https://github.com/Keepod/keepod-installer.git
+Homepage: http://www.keepod.org
 
-Package: unetbootin
+Package: keepod-installer
 Architecture: amd64 i386
-Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, p7zip-full, syslinux, udev
-Recommends: extlinux, unetbootin-translations
-Description: installer of Linux/BSD distributions to a partition or USB drive
- UNetbootin allows for the installation of various Linux/BSD distributions to a
- partition or USB drive, so it's no different from a standard install, only it
- doesn't need a CD. It can create a dual-boot install, or replace the existing
- OS entirely.
+Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, p7zip-full, syslinux, udev, libicu48
+Recommends: extlinux, keepod-installer-translations
+Description: installer of Keepod OS to a USB drive
+ Keepod-installer allows for the installation of Keepod OS to a USB drive.
 
-Package: unetbootin-translations
+Package: keepod-installer-translations
 Architecture: all
 Depends: ${misc:Depends}
-Recommends: unetbootin
-Description: translations for the unetbootin distribution installer
- UNetbootin is an installer of Linux/BSD distributions to a partition or USB
- drive.
+Recommends: keepod-installer
+Description: translations for the keepod-installer distribution
+ keepod-installer is an installer of Keepod OS to USB dries.
  .
- This package contains translation files for unetbootin.
+ This package contains translation files for keepod-installer.

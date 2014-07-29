@@ -14,12 +14,12 @@ clean:
 	rm -f *.qm
 
 install: build
-	dh install -punetbootin
+	dh install -pkeepod-installer
 
 # Build architecture-independent files here.
 binary-indep:
 	lrelease-qt4 unetbootin.pro
-	dh_install --sourcedir=$(CURDIR) -punetbootin-translations
+	dh_install --sourcedir=$(CURDIR) -pkeepod-installer-translations
 
 # Build architecture-dependent files here.
 binary-arch: install

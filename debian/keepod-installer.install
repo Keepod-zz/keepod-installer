@@ -1,0 +1,3 @@
+debian/keepod-installer.xpm usr/share/pixmaps
+keepod-installer usr/bin
+keepod-installer.desktop usr/share/applications

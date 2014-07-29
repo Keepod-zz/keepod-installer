@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=Keepod Installer
+Comment=Tool for creating Keepod USB drives
+Categories=Application;System;
+Exec=/usr/bin/keepod-installer
+Terminal=false
+Type=Application
+Name[en_US]=keepod-installer
+GenericName[en_US]=keepod-installer
+Comment[en_US]=Tool for creating Keepod USB drives
+Icon=keepod-installer
