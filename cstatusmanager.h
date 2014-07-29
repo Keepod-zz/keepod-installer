@@ -18,7 +18,8 @@ typedef enum {
     ERR_DOWNLOAD_FAILED,
     ERR_MD5_MISMATCH,
     ERR_EXTRACT_FAILED,
-    ERR_WRITE_FAILED
+    ERR_WRITE_FAILED,
+    ERR_CANCELED
 } ENStatus;
 
 class CStatusManager : public QObject

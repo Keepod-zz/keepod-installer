@@ -17,7 +17,7 @@
 #define MSG_WRITE_FAILED                "An error occurs while writing into the disk."
 
 // @deprecated@
-#define MSG_UMOUNT_FAILED               "Failed to unmount"
+#define MSG_UMOUNT_FAILED               "Failed to unmount partitions on "
 #define MSG_REPARTITION_FAILED          "Failed to repartition"
 
 #define MSG_CANCELED                    "Installing Keepod was canceled by the user."

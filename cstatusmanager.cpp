@@ -36,6 +36,7 @@ void CStatusManager::setStatus ( ENStatus i_enStat, QLabel *i_lblStatus, const Q
         case ERR_MD5_MISMATCH:
         case ERR_EXTRACT_FAILED:
         case ERR_WRITE_FAILED:
+        case ERR_CANCELED:
             palTextColor.setColor(QPalette::WindowText, Qt::red);
             break;
 
@@ -97,6 +98,10 @@ QString CStatusManager::statusString ( void )
 
     case ERR_WRITE_FAILED:
         szRet = MSG_WRITE_FAILED;
+        break;
+
+    case ERR_CANCELED:
+        szRet = MSG_CANCELED;
         break;
 
     case STAT_BASE:

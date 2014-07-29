@@ -16,7 +16,7 @@ CUIMain::CUIMain(QWidget *parent)
     getUsbDrivesList();
     refreshDiskTable();
 
-    m_bStopFlag = false;
+    m_aInstallTasks = NULL;
 }
 
 
@@ -112,21 +112,21 @@ void CUIMain::getUsbDrivesList()
         }
     }*/
 
-    QString prevPDevName("");
+//    QString prevPDevName("");
     for (int i = 0; i < driveslist.size(); ++i)
     {
         CUsbDiskInfo *adisk = new CUsbDiskInfo();
         QString newDevName = driveslist.at(i);
 
         adisk->setInfoByDevname ( newDevName );
-        adisk->setLabel(unetbootin::getlabel( newDevName ));
-        adisk->setUuid(unetbootin::getuuid( newDevName ));
+//        adisk->setLabel(unetbootin::getlabel( newDevName ));
+//        adisk->setUuid(unetbootin::getuuid( newDevName ));
 
-        if ( prevPDevName == adisk->getParentDevname() ) {
-            continue;
-        }
+//        if ( prevPDevName == adisk->getParentDevname() ) {
+//            continue;
+//        }
 
-        prevPDevName = adisk->getParentDevname();
+//        prevPDevName = adisk->getParentDevname();
 
         m_aUsbDiskInfos.append(adisk);
     }
@@ -368,7 +368,6 @@ void CUIMain::on_btnStart_clicked()
             cancelTasks();
         }
         //btnStart->setEnabled(false);
-        //stopFlag = true;
     } else {
         // Check if the given path is correct.
         m_bDownloadLatest = (chkDownloadLatest->checkState() == Qt::Checked);
@@ -450,24 +449,24 @@ void CUIMain::on_chkDownloadLatest_stateChanged(int arg1)
 
 void CUIMain::onThreadFinished()
 {
-    qDebug() << "One more thread finished.";
-
-    /*if ( stopFlag == false ) {
-        SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_COMPLETED );
-    } else {
-        SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
-        stopFlag = false;
-    }*/
-
     if ( m_nRunningTaskCount > 0 ) {
         m_nRunningTaskCount --;
     }
 
     if ( m_nRunningTaskCount <= 0 ) {
-        m_statusManager.setStatus(STAT_DONE, lblStatus);
         setMode ( true );
 
         CNorChangedBlocks::finalize();
+
+        if ( btnStart->windowState() == Qt::WA_Disabled ) {
+            m_statusManager.setStatus(ERR_CANCELED, lblStatus);
+            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
+        } else {
+            m_statusManager.setStatus(STAT_DONE, lblStatus);
+            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_COMPLETED );
+
+            exit ( 0 );
+        }
     }
 
     //printf("exitstatus:success\n");
@@ -558,12 +557,17 @@ void CUIMain::dlprogressupdate64(qint64 dlbytes, qint64 maxbytes)
 
 void CUIMain::cancelTasks()
 {
-    QList<int> selIds = getSelectedIds();
-    int selcount = selIds.size();
+    btnStart->setEnabled(false);
 
-    for ( int i=0; i<selcount; i++ ) {
-        m_aInstallTasks[i]->quit();
-        m_aInstallTasks[i]->wait(2000);
+    if ( m_aInstallTasks != NULL ) {
+        QList<int> selIds = getSelectedIds();
+        int selcount = selIds.size();
+
+        for ( int i=0; i<selcount; i++ ) {
+            // m_aInstallTasks[i]->quit();
+            m_aInstallTasks[i]->m_bStopFlag = true;
+            m_aInstallTasks[i]->wait(2000);
+        }
     }
 }
 

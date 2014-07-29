@@ -21,8 +21,10 @@ public:
 
     // actions
     bool umount ();
+#ifdef OLD_VERSION
     bool keepodFormat ();
     bool writeGrub ();
+#endif
     QString mount ();
 
     // query infos
@@ -43,6 +45,8 @@ public:
 
     QString getBlkidValue ( QString key );
     QString getNewMountPoint ();
+
+    static quint64 getBlockSizeKb ( QString i_szDev );
     
 signals:
     

@@ -219,6 +219,8 @@ void nDirListStor::sAppendSelfUrlInfoList(QUrlInfo curDirUrl)
 unetbootin::unetbootin(InstallTaskInfo *taskInfo)
 {
     this->taskInfo = taskInfo;
+
+    m_bStopFlag = false;
 }
 
 bool unetbootin::ubninitialize(/*QList<QPair<QString, QString> > oppairs*/)
@@ -349,6 +351,7 @@ QStringList unetbootin::listsanedrives()
     QFileInfoList usbfileinfoL = devlstdir.entryInfoList(QDir::NoDotAndDotDot|QDir::Files);
     for (int i = 0; i < usbfileinfoL.size(); ++i)
     {
+#ifdef OLD_VERSION
         if (usbfileinfoL.at(i).fileName().contains(QRegExp("^usb-\\S{1,}$")) ||
             usbfileinfoL.at(i).fileName().contains(QRegExp("^mmc-\\S{1,}$")))
         {
@@ -367,6 +370,14 @@ QStringList unetbootin::listsanedrives()
                 }
             }
         }
+#else
+        if (usbfileinfoL.at(i).fileName().contains(QRegExp("^usb-.*0:0$")) ||
+            usbfileinfoL.at(i).fileName().contains(QRegExp("^mmc-.*0:0$")))
+        {
+            fulldrivelist.append(usbfileinfoL.at(i).canonicalFilePath());
+        }
+#endif
+
     }
     #endif
 
@@ -2892,11 +2903,16 @@ void unetbootin::run()
 
     ret = taskInfo->disk->umount();
     if ( ret == false ) {
-        SHOW_MESSAGE (KEEPOD_INSTALLER_TITLE, MSG_UMOUNT_FAILED + QString(": ")  + taskInfo->disk->m_szDevName);
+        SHOW_MESSAGE (KEEPOD_INSTALLER_TITLE, MSG_UMOUNT_FAILED + taskInfo->disk->m_szDevName);
         return;
     }
 
-#if OLD_VERSION
+    // check user's interrupt
+    if ( m_bStopFlag ) {
+        return;
+    }
+
+#ifdef OLD_VERSION
     ret = taskInfo->disk->keepodFormat();
     if ( ret == false ) {
         SHOW_MESSAGE (KEEPOD_INSTALLER_TITLE, MSG_REPARTITION_FAILED + QString(": ") + taskInfo->disk->getParentDevname());
@@ -3006,7 +3022,7 @@ void unetbootin::run()
 
     emit progress(taskInfo->diskIdOnUI, PRG_ISO_EXTRACTED);
 #else
-    QString szDev = taskInfo->disk->getParentDevname();
+    QString szDev = taskInfo->disk->m_szDevName;
 
     if ( CNorChangedBlocks::s_nStepCount > 0 ) {
         int nCurStep;
@@ -3014,6 +3030,11 @@ void unetbootin::run()
             int nNewProgress = PRG_ISO_EXTRACTED+(PRG_FINISHED-PRG_ISO_EXTRACTED)*nCurStep/CNorChangedBlocks::s_nStepCount;
 
             emit progress(taskInfo->diskIdOnUI, nNewProgress);
+
+            // check user's interrupt
+            if ( m_bStopFlag ) {
+                return;
+            }
         }
 
         // check if exit is due to the failure.
@@ -3480,7 +3501,9 @@ void unetbootin::runinstusb()
 		QFile::setPermissions(extlinuxcommand, QFile::ReadOwner|QFile::ExeOwner|QFile::ReadGroup|QFile::ExeGroup|QFile::ReadOther|QFile::ExeOther|QFile::WriteOwner);
 	#endif
 #ifdef Q_OS_LINUX
+#ifdef OLD_VERSION
         taskInfo->disk->writeGrub();
+#endif
         /*
 		isext2 = false;
 		if (!volidcommand.isEmpty())

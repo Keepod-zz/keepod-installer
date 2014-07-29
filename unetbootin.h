@@ -164,6 +164,7 @@ public:
 #endif
 
     InstallTaskInfo  *taskInfo;
+    bool m_bStopFlag;
 
     CNorImagesDiff  norImagesDiff;
     static bool checkGrub1Installed ();

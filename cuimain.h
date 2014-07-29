@@ -29,7 +29,6 @@ public:
     QList<CUsbDiskInfo*> m_aUsbDiskInfos;
     bool m_bDownloadLatest;
     QString m_szIsoPath;
-    bool m_bStopFlag;
 
     CStatusManager m_statusManager;
 
