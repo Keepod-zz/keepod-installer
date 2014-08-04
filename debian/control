@@ -10,9 +10,9 @@ Vcs-Browser: https://github.com/Keepod/keepod-installer.git
 Homepage: http://www.keepod.org
 
 Package: keepod-installer
-Architecture: amd64 i386
-Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, p7zip-full, syslinux, udev, libicu48
-Recommends: extlinux, keepod-installer-translations
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, udev, libicu48
+Recommends: keepod-installer-translations
 Description: installer of Keepod OS to a USB drive
  Keepod-installer allows for the installation of Keepod OS to a USB drive.
 
