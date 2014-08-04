@@ -308,9 +308,9 @@ bool unetbootin::ubninitialize(/*QList<QPair<QString, QString> > oppairs*/)
 	if (QFile::exists("/usr/bin/extlinux"))
 		extlinuxcommand = "/usr/bin/extlinux";
 	else
-        extlinuxcommand = locatecommand("extlinux", tr("EXT2-formatted USB drive"), "extlinux");
+        //extlinuxcommand = locatecommand("extlinux", tr("EXT2-formatted USB drive"), "extlinux");
 	#endif
-	sevzcommand = locatecommand("7z", tr("either"), "p7zip-full");
+	//sevzcommand = locatecommand("7z", tr("either"), "p7zip-full");
 	#endif
 	ubntmpf = QDir::toNativeSeparators(QString("%1/").arg(QDir::tempPath()));
     #ifdef Q_OS_LINUX
