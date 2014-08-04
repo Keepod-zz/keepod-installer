@@ -11,7 +11,7 @@ Homepage: http://www.keepod.org
 
 Package: keepod-installer
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, udev, libicu48
+Depends: ${misc:Depends}, ${shlibs:Depends}, mtools, udev, libicu48, dcfldd
 Recommends: keepod-installer-translations
 Description: installer of Keepod OS to a USB drive
  Keepod-installer allows for the installation of Keepod OS to a USB drive.
