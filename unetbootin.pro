@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = unetbootin
+TARGET = keepod-installer
 DEPENDPATH += .
 INCLUDEPATH += .
 CONFIG += debug \
@@ -28,7 +28,6 @@ QT += core \
     gui \
     network
 ICON = unetbootin.icns
-RESOURCES += keepodinstaller.qrc
 TRANSLATIONS += unetbootin.ts
 DEFINES += NOSTATIC
 

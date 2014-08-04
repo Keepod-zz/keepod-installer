@@ -458,7 +458,7 @@ void CUIMain::onThreadFinished()
 
         CNorChangedBlocks::finalize();
 
-        if ( btnStart->windowState() == Qt::WA_Disabled ) {
+        if ( btnStart->windowState() != Qt::WA_Disabled ) {
             m_statusManager.setStatus(ERR_CANCELED, lblStatus);
             SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
         } else {
