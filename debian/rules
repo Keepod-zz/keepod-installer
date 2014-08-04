@@ -5,7 +5,7 @@
 
 build: build-stamp
 build-stamp:
-	qmake-qt4 "QMAKE_CXXFLAGS_RELEASE += $(CFLAGS)"
+	qmake-qt4 "DEFINES += NOSTATIC" "QMAKE_CXXFLAGS_RELEASE += $(CFLAGS)" "RESOURCES += keepodinstaller.qrc"
 	make
 	touch $@
 
@@ -18,8 +18,11 @@ install: build
 
 # Build architecture-independent files here.
 binary-indep:
-	lrelease-qt4 unetbootin.pro
+	cp unetbootin.pro unetbootin-pro.bak
+	sed -i '/^RESOURCES/d' unetbootin.pro
+	lrelease-qt4 unetbootin.pro	
 	dh_install --sourcedir=$(CURDIR) -pkeepod-installer-translations
+	mv unetbootin-pro.bak unetbootin.pro
 
 # Build architecture-dependent files here.
 binary-arch: install
