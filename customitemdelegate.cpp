@@ -32,6 +32,8 @@ void CustomItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
         col.setNamedColor("#05B8CC");
         pal.setColor(QPalette::Highlight,col);
+        pal.setColor(QPalette::Foreground,col);
+        pal.setColor(QPalette::Background,col);
         progressBarOption.palette = pal;
         progressBarOption.type = QStyleOption::SO_ProgressBar;
         progressBarOption.version = 2 ;

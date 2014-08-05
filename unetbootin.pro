@@ -30,5 +30,6 @@ QT += core \
 ICON = unetbootin.icns
 TRANSLATIONS += unetbootin.ts
 DEFINES += NOSTATIC
+RESOURCES += keepodinstaller.qrc
 
 unix:!macx:!symbian: LIBS += -lzip
