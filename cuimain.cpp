@@ -367,7 +367,6 @@ void CUIMain::on_btnStart_clicked()
         if ( msgb.exec() == QMessageBox::Yes ) {
             cancelTasks();
         }
-        //btnStart->setEnabled(false);
     } else {
         // Check if the given path is correct.
         m_bDownloadLatest = (chkDownloadLatest->checkState() == Qt::Checked);
@@ -454,19 +453,19 @@ void CUIMain::onThreadFinished()
     }
 
     if ( m_nRunningTaskCount <= 0 ) {
-        setMode ( true );
-
         CNorChangedBlocks::finalize();
 
-        if ( btnStart->windowState() != Qt::WA_Disabled ) {
-            m_statusManager.setStatus(ERR_CANCELED, lblStatus);
-            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
-        } else {
+        if ( btnStart->isEnabled() ) {
             m_statusManager.setStatus(STAT_DONE, lblStatus);
             SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_COMPLETED );
 
             exit ( 0 );
+        } else {
+            m_statusManager.setStatus(ERR_CANCELED, lblStatus);
+            SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
         }
+
+        setMode ( true );
     }
 
     //printf("exitstatus:success\n");
