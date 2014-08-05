@@ -510,7 +510,7 @@ void CUIMain::dlprogressupdate(int dlbytes, int maxbytes)
     if(oldsec != time.second())
     {
       oldsec = time.second();
-      int newprg = PRG_INIT+(PRG_ISO_PREPARED-PRG_INIT)*dlbytes/maxbytes;
+      int newprg = PRG_INIT+(float)(PRG_ISO_PREPARED-PRG_INIT)*dlbytes/maxbytes;
 
       // Set initial progress
       for ( int i=0; i<selcount; i++ ) {
@@ -540,12 +540,17 @@ void CUIMain::dlprogressupdate64(qint64 dlbytes, qint64 maxbytes)
     if(oldsec != time.second())
     {
       oldsec = time.second();
-      int newprg = PRG_INIT+(PRG_ISO_PREPARED-PRG_INIT)*dlbytes/maxbytes;
+      int newprg = PRG_INIT+(float)(PRG_ISO_PREPARED-PRG_INIT)*dlbytes/maxbytes;
 
       // Set initial progress
       for ( int i=0; i<selcount; i++ ) {
           onProgressUpdate ( selIds.at(i), newprg );
       }
+
+      // Show the download progress as percentage.
+      QString szMsg;
+      szMsg.sprintf("%s %.2f%%", MSG_DOWNLOADING, (float)dlbytes/maxbytes*100.0);
+      m_statusManager.setStatus(STAT_DOWNLOADING, lblStatus, szMsg);
 
         //tprogress->setValue(dlbytes);
         //tprogress->setMaximum(maxbytes);

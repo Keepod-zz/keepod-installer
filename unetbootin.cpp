@@ -2230,11 +2230,6 @@ void unetbootin::cpprogressupdate64(qint64 dlbytes, qint64 maxbytes)
    int newprg = PRG_INIT+(PRG_ISO_PREPARED-PRG_INIT)*dlbytes/maxbytes;
 
    emit progress(taskInfo->diskIdOnUI, newprg);
-
-//	 tprogress->setValue(dlbytes);
-//	 tprogress->setMaximum(maxbytes);
-   // display the downloaded size with suffix
-//	 pdesc1->setText(tr("<b>Copied:</b> %1 of %2").arg(displayfisize(dlbytes)).arg(displayfisize(maxbytes)));
  }
 }
 
@@ -3027,7 +3022,7 @@ void unetbootin::run()
     if ( CNorChangedBlocks::s_nStepCount > 0 ) {
         int nCurStep;
         while ( (nCurStep = norImagesDiff.cloneStep(szDev.toLocal8Bit().data())) > 0 ) {
-            int nNewProgress = PRG_ISO_EXTRACTED+(PRG_FINISHED-PRG_ISO_EXTRACTED)*nCurStep/CNorChangedBlocks::s_nStepCount;
+            int nNewProgress = PRG_ISO_EXTRACTED+(float)(PRG_FINISHED-PRG_ISO_EXTRACTED)*nCurStep/CNorChangedBlocks::s_nStepCount;
 
             emit progress(taskInfo->diskIdOnUI, nNewProgress);
 
