@@ -272,6 +272,13 @@ public slots:
 signals:
     void progress(int id, int prg);
     void failed(int id, int err );
+
+public:
+    // download related
+    static bool s_isftp;
+    static QHttp *s_dlhttp;
+    static QFtp *s_dlftp;
+    static QEventLoop *s_dlewait;
 };
 
 #endif

@@ -200,7 +200,13 @@ bool CUIMain::runInstallTasks()
         if ( cmdres.contains("OK") == FALSE ) {
             ret = unetbootin::downloadfile ( LATEST_VERSION_URL, isotmpf, 0, this );
             if ( ret == false ) {
-                m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
+                if ( unetbootin::s_dlewait != NULL ) {
+                    m_statusManager.setStatus(ERR_DOWNLOAD_FAILED, lblStatus);
+                } else {
+                    // if the operation was cancelled by the user,
+                    m_statusManager.setStatus(ERR_CANCELED, lblStatus);
+                    SHOW_MESSAGE ( KEEPOD_INSTALLER_TITLE, MSG_CANCELED );
+                }
                 return false;
             }
         }
@@ -321,13 +327,10 @@ void CUIMain::closeEvent (QCloseEvent *event)
         msgb.setStandardButtons(QMessageBox::No|QMessageBox::Yes);
 
         if ( msgb.exec() == QMessageBox::Yes ) {
-            if ( m_nRunningTaskCount > 0 ) {
-                cancelTasks();
-            }
-            event->accept();
-        } else {
-            event->ignore();
+            cancelTasks();
         }
+
+        event->ignore();
     }
 }
 
@@ -404,7 +407,10 @@ void CUIMain::on_btnStart_clicked()
 
         setMode ( false );
 
-        if ( runInstallTasks() == true ) {}
+        if ( runInstallTasks() == false ) {
+            // if an error occurs before writing into the disk.
+            setMode( true );
+        }
     }
 }
 
@@ -467,14 +473,6 @@ void CUIMain::onThreadFinished()
 
         setMode ( true );
     }
-
-    //printf("exitstatus:success\n");
-    //QApplication::exit();
-    //exit(0);
-
-    /*for ( i=0; i<selcount; i++ ) {
-        installTasks[i]->wait();
-    }*/
 }
 
 void CUIMain::onThreadTerminated()
@@ -571,6 +569,27 @@ void CUIMain::cancelTasks()
             // m_aInstallTasks[i]->quit();
             m_aInstallTasks[i]->m_bStopFlag = true;
             m_aInstallTasks[i]->wait(2000);
+        }
+    } else {
+        if ( unetbootin::s_isftp == true ) {
+            if ( unetbootin::s_dlftp != NULL ) {
+                unetbootin::s_dlftp->disconnect();
+                unetbootin::s_dlftp->close();
+                unetbootin::s_dlftp->abort();
+                unetbootin::s_dlftp = NULL;
+            }
+        } else {
+            if ( unetbootin::s_dlhttp != NULL ) {
+                unetbootin::s_dlhttp->disconnect();
+                unetbootin::s_dlhttp->close();
+                unetbootin::s_dlhttp->abort();
+                unetbootin::s_dlhttp = NULL;
+            }
+        }
+
+        if ( unetbootin::s_dlewait != NULL ) {
+            unetbootin::s_dlewait->quit();
+            unetbootin::s_dlewait = NULL;
         }
     }
 }

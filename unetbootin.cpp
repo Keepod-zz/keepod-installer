@@ -47,6 +47,11 @@ QString unetbootin::mlabelcommand = "";
 QString unetbootin::e2labelcommand = "";
 bool unetbootin::isext2 = false;
 
+bool unetbootin::s_isftp = false;
+QHttp *unetbootin::s_dlhttp = NULL;
+QFtp *unetbootin::s_dlftp = NULL;
+QEventLoop *unetbootin::s_dlewait = NULL;
+
 
 static const QList<QRegExp> ignoredtypesbothRL = QList<QRegExp>()
 << QRegExp("isolinux.bin$", Qt::CaseInsensitive)
@@ -2066,29 +2071,27 @@ bool unetbootin::downloadfile(QString fileurl, QString targetfile, int minsize, 
 		rmFile(targetfile);
 	}
 	QUrl dlurl(fileurl);
-	bool isftp = false;
+
+    s_isftp = false;
 	if (dlurl.scheme() == "ftp")
 	{
-		isftp = true;
+        s_isftp = true;
 	}
-	QHttp dlhttp;
-	QFtp dlftp;
-	QEventLoop dlewait;
-//	pdesc5->setText("");
-//	pdesc4->setText(tr("Downloading files, please wait..."));
-//	pdesc3->setText(tr("<b>Source:</b> <a href=\"%1\">%1</a>").arg(fileurl));
-//	pdesc2->setText(tr("<b>Destination:</b> %1").arg(targetfile));
-//	pdesc1->setText(tr("<b>Downloaded:</b> 0 bytes"));
+
+    s_dlewait = new QEventLoop();
+
 	QString realupath = QString(fileurl).remove(0, fileurl.indexOf(QString("://%1").arg(dlurl.host())) + QString("://%1").arg(dlurl.host()).length());
-	if (isftp)
+    if (s_isftp)
 	{
-		connect(&dlftp, SIGNAL(done(bool)), &dlewait, SLOT(quit()));
-        connect(&dlftp, SIGNAL(dataTransferProgress(qint64, qint64)), uimain, SLOT(dlprogressupdate64(qint64, qint64)));
+        s_dlftp = new QFtp();
+        connect(s_dlftp, SIGNAL(done(bool)), s_dlewait, SLOT(quit()));
+        connect(s_dlftp, SIGNAL(dataTransferProgress(qint64, qint64)), uimain, SLOT(dlprogressupdate64(qint64, qint64)));
 	}
 	else
 	{
-		connect(&dlhttp, SIGNAL(done(bool)), &dlewait, SLOT(quit()));
-        connect(&dlhttp, SIGNAL(dataReadProgress(int, int)), uimain, SLOT(dlprogressupdate(int, int)));
+        s_dlhttp = new QHttp();
+        connect(s_dlhttp, SIGNAL(done(bool)), s_dlewait, SLOT(quit()));
+        connect(s_dlhttp, SIGNAL(dataReadProgress(int, int)), uimain, SLOT(dlprogressupdate(int, int)));
 	}
 	QFile dloutfile;
 	if (installType == tr("USB Drive"))
@@ -2100,37 +2103,51 @@ bool unetbootin::downloadfile(QString fileurl, QString targetfile, int minsize, 
 		dloutfile.setFileName(targetfile);
 	}
 	dloutfile.open(QIODevice::WriteOnly);
-	if (isftp)
+    if (s_isftp)
 	{
-		dlftp.connectToHost(dlurl.host());
-		dlftp.login();
-		dlftp.get(realupath, &dloutfile);
+        s_dlftp->connectToHost(dlurl.host());
+        s_dlftp->login();
+        s_dlftp->get(realupath, &dloutfile);
 	}
 	else
 	{
-		dlhttp.setHost(dlurl.host());
+        s_dlhttp->setHost(dlurl.host());
 		ubngetrequestheader dlrequest(dlurl.host(), realupath);
-		dlhttp.request(dlrequest, 0, &dloutfile);
+        s_dlhttp->request(dlrequest, 0, &dloutfile);
 	}
-	dlewait.exec();
-	if (!isftp)
+    s_dlewait->exec();
+    if (!s_isftp)
 	{
-		QHttpResponseHeader dlresponse(dlhttp.lastResponse());
-		int dlrstatus = dlresponse.statusCode();
-		if (dlrstatus >= 300 && dlrstatus < 400 && dlresponse.hasKey("Location"))
-		{
-			dloutfile.close();
-			rmFile(dloutfile);
-            return downloadfile(dlresponse.value("Location"), targetfile, minsize);
-		}
+        if ( s_dlhttp != NULL ) {
+            QHttpResponseHeader dlresponse(s_dlhttp->lastResponse());
+            int dlrstatus = dlresponse.statusCode();
+            if (dlrstatus >= 300 && dlrstatus < 400 && dlresponse.hasKey("Location"))
+            {
+                dloutfile.close();
+                rmFile(dloutfile);
+                return downloadfile(dlresponse.value("Location"), targetfile, minsize);
+            }
+        }
 	}
-	if (isftp)
+    if (s_isftp)
 	{
-		dlftp.close();
+        if ( s_dlftp != NULL ) {
+            s_dlftp->close();
+            s_dlftp = NULL;
+        } else {
+            // if downloading was cancelled by the user,
+            return false;
+        }
 	}
 	else
 	{
-		dlhttp.close();
+        if ( s_dlhttp != NULL ) {
+            s_dlhttp->close();
+            s_dlhttp = NULL;
+        } else {
+            // if downloading was cancelled by the user,
+            return false;
+        }
 	}
 	dloutfile.close();
 	if (installType == tr("USB Drive"))
