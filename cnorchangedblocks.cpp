@@ -2,6 +2,8 @@
 #include "definitions.h"
 #include "unetbootin.h"
 
+#include "zip.h"
+
 int CNorChangedBlocks::s_nExtractedCount = 0;
 STChangedFileInfo **CNorChangedBlocks::s_aCFInfos = NULL;
 int CNorChangedBlocks::s_nStepCount = 0;
