@@ -70,8 +70,8 @@ greaterThan( QT_MAJOR_VERSION, 4): {
 
 
 win32:{
-    # bug
-    #    QT_PATH = $$(QTDIR) #bug 在命令行下不能用 在QtCreator下可用
+
+    #    QT_PATH = $$(QTDIR) # it be recognized in QtCreator, not in command
     #    QT_PATH = $$[QT_INSTALL_BINS]
     !CONFIG(DEFQTPATH):    QT_PATH = $$(QTDIR)
 
@@ -81,11 +81,21 @@ win32:{
     LIBS += \
         -L"$$THIRDPARTY_PATH/libzip/lib" \
         -lzip
-
-    QT_BINFILES += \
-        $${QT_PATH}/bin/QtCore4.dll \
-        $${QT_PATH}/bin/QtNetwork4.dll \
-        $${QT_PATH}/bin/QtGui4.dll
+		
+	greaterThan( QT_MAJOR_VERSION, 4): {
+		QT_BINFILES += \
+			$${QT_PATH}/bin/Qt5Core.dll \
+			$${QT_PATH}/bin/Qt5Network.dll \
+			$${QT_PATH}/bin/Qt5Gui.dll \
+			$${QT_PATH}/bin/Qt5Widgets.dll \
+			$${QT_PATH}/plugins/platforms/qwindows.dll \
+			$${QT_PATH}/plugins/platforms/qminimal.dll 
+	}else{
+		QT_BINFILES += \
+			$${QT_PATH}/bin/QtCore4.dll \
+			$${QT_PATH}/bin/QtNetwork4.dll \
+			$${QT_PATH}/bin/QtGui4.dll
+	}
 
 
     CPP_BINFILES += \
