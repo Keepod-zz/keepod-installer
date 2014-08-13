@@ -38,16 +38,25 @@ void CUIMain::customizeUI()
 
     // set attributes of headers
     QHeaderView *hzHeader = tblDevices->horizontalHeader();
+
+#if QTCORE_VERSION>4
+    hzHeader->setSectionResizeMode(QHeaderView::Fixed);
+    hzHeader->setSectionsClickable(false);
+    hzHeader->setSectionsMovable(false);
+#else
     hzHeader->setResizeMode(QHeaderView::Fixed);
     hzHeader->setClickable(false);
     hzHeader->setMovable(false);
+#endif
+
     hzHeader->resizeSection(TABLE_COLUMN_CHECK, 25);
     hzHeader->resizeSection(TABLE_COLUMN_LABEL, 120);
     hzHeader->resizeSection(TABLE_COLUMN_PROGRESS, 200);
     hzHeader->resizeSection(TABLE_COLUMN_MOREINFO, 24);
 
     QHeaderView *vtHeader = tblDevices->verticalHeader();
-    vtHeader->setShown(false);
+//    vtHeader->setShown(false);
+    vtHeader->setHidden(true);
 
     tblDevices->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     tblDevices->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);

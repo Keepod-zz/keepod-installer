@@ -2,7 +2,7 @@
 #define CNORCHANGED_BLOCKS_H
 
 #include <QObject>
-#include <zip.h>
+//#include <zip.h>
 
 typedef struct {
     quint64  start;

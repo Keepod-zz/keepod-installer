@@ -14,6 +14,11 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 #include "definitions.h"
 
+#ifdef Q_OS_WIN
+    #include <dbt.h>
+    #include <winioctl.h>
+#endif
+
 // static member initialization
 QString unetbootin::ubntmpf = "";
 bool unetbootin::skipExtraction = false;
@@ -35,6 +40,8 @@ QString unetbootin::installType = "";
 QString unetbootin::sevzcommand = "";
 QFile* unetbootin::logFile = NULL;
 QTextStream* unetbootin::logStream = NULL;
+
+#ifdef Q_OS_UNIX
 QString unetbootin::fdiskcommand = "";
 QString unetbootin::sfdiskcommand = "";
 QString unetbootin::dfcommand = "";
@@ -46,6 +53,7 @@ QString unetbootin::mke2fscommand = "";
 QString unetbootin::mlabelcommand = "";
 QString unetbootin::e2labelcommand = "";
 bool unetbootin::isext2 = false;
+#endif
 
 bool unetbootin::s_isftp = false;
 QHttp *unetbootin::s_dlhttp = NULL;
@@ -151,7 +159,10 @@ void callexternappWriteToStdinT::run()
 {
 	QProcess lnexternapp;
     lnexternapp.start("\"" + execFile + "\" " + execParm);
-	lnexternapp.write(writeToStdin.toAscii().data());
+//	lnexternapp.write(writeToStdin.toAscii().data());
+    QByteArray aByte = writeToStdin.toLocal8Bit();
+    lnexternapp.write(aByte.data());
+
 	lnexternapp.closeWriteChannel();
 	lnexternapp.waitForFinished(-1);
 	retnValu = QString(lnexternapp.readAll());
@@ -333,19 +344,67 @@ QStringList unetbootin::listcurdrives()
 	return listsanedrives();
 }
 
+
 QStringList unetbootin::listsanedrives()
 {
+    // !!!!!!!!!! BUG !!!!!!!!!! 不能识别出移动硬盘 at 2014/08/11  fixed by cmoooony@gmail.com
 	QStringList fulldrivelist;
 
     #ifdef Q_OS_WIN32
     QFileInfoList extdrivesList = QDir::drives();
     for (int i = 0; i < extdrivesList.size(); ++i)
     {
-        if (QDir::toNativeSeparators(extdrivesList.at(i).path().toUpper()) != QDir::toNativeSeparators(QDir::rootPath().toUpper()) && !QDir::toNativeSeparators(extdrivesList.at(i).path().toUpper()).contains("A:") && !QDir::toNativeSeparators(extdrivesList.at(i).path().toUpper()).contains("B:"))
+        QString sPath = extdrivesList.at(i).path().toUpper();
+        if (QDir::toNativeSeparators(sPath) != QDir::toNativeSeparators(QDir::rootPath()) && !QDir::toNativeSeparators(sPath).contains("A:") && !QDir::toNativeSeparators(sPath).contains("B:"))
         {
-            if (GetDriveType(LPWSTR(extdrivesList.at(i).path().toUpper().utf16())) == 2)
+//            int type = GetDriveType(LPWSTR(extdrivesList.at(i).path().toUpper().utf16()));
+//            if ( type == DRIVE_REMOVABLE)
+//            {
+//                fulldrivelist.append(QDir::toNativeSeparators(extdrivesList.at(i).path().toUpper()));
+//            }
+
+            int type = GetDriveType(LPWSTR(sPath.utf16()));
+            if ( type == DRIVE_REMOVABLE)
             {
-                fulldrivelist.append(QDir::toNativeSeparators(extdrivesList.at(i).path().toUpper()));
+                fulldrivelist.append(QDir::toNativeSeparators(sPath));
+            }
+            else if (type == DRIVE_FIXED)
+            {
+                QString szBuf = QString("//./%1").arg(sPath.replace('/', ""));
+
+                //                sprintf(szBuf, "//./%c:", 'A'+drive);
+                HANDLE hDevice = CreateFile(LPWSTR(szBuf.utf16()),
+                                            GENERIC_READ,
+                                            FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                            NULL, OPEN_EXISTING, NULL, NULL);
+
+                if (hDevice != INVALID_HANDLE_VALUE)
+                {
+                    PSTORAGE_DEVICE_DESCRIPTOR pDevDesc = (PSTORAGE_DEVICE_DESCRIPTOR)new BYTE[sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1];
+
+                    pDevDesc->Size = sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1;
+                    STORAGE_PROPERTY_QUERY Query; // input param for query
+                    DWORD dwOutBytes; // IOCTL output length
+                    BOOL bResult; // IOCTL return val
+
+                    // specify the query type
+                    Query.PropertyId = StorageDeviceProperty;
+                    Query.QueryType = PropertyStandardQuery;
+
+                    // Query using IOCTL_STORAGE_QUERY_PROPERTY
+                    bResult = ::DeviceIoControl(hDevice, // device handle
+                                                IOCTL_STORAGE_QUERY_PROPERTY, // info of device property
+                                                &Query, sizeof(STORAGE_PROPERTY_QUERY), // input data buffer
+                                                pDevDesc, pDevDesc->Size, // output data buffer
+                                                &dwOutBytes, // out's length
+                                                (LPOVERLAPPED)NULL);
+                    if(bResult && pDevDesc->BusType == BusTypeUsb)  // This is the ‘Check Point’!!! ;-)
+                    {
+                        // We store the drive letter here
+                        fulldrivelist.append(QDir::toNativeSeparators(sPath));
+                    }
+                }
+                CloseHandle(hDevice);
             }
         }
     }
@@ -595,7 +654,7 @@ bool unetbootin::checkifoutofspace(QString destindir)
 	ULARGE_INTEGER FreeBytesAvailable;
 	ULARGE_INTEGER TotalNumberOfBytes;
 	ULARGE_INTEGER TotalNumberOfFreeBytes;
-	if (GetDiskFreeSpaceExA(destindir.toAscii(), &FreeBytesAvailable, &TotalNumberOfBytes, &TotalNumberOfFreeBytes))
+    if (GetDiskFreeSpaceExA(destindir.toLocal8Bit()/*destindir.toAscii()*/, &FreeBytesAvailable, &TotalNumberOfBytes, &TotalNumberOfFreeBytes))
 	{
 		if (FreeBytesAvailable.QuadPart < 1024)
 			outofspace = true;
@@ -2734,7 +2793,7 @@ void unetbootin::installsvzip()
 
 void unetbootin::configsysEdit()
 {
-	SetFileAttributesA(QDir::toNativeSeparators(QString("%1config.sys").arg(targetDrive)).toAscii(), FILE_ATTRIBUTE_NORMAL);
+    SetFileAttributesA(QDir::toNativeSeparators(QString("%1config.sys").arg(targetDrive)).toLocal8Bit()/*toAscii()*/, FILE_ATTRIBUTE_NORMAL);
 	QFile::copy(QDir::toNativeSeparators(QString("%1config.sys").arg(targetDrive)), QString("%1config.sys").arg(targetPath));
 	QFile::copy(QDir::toNativeSeparators(QString("%1config.sys").arg(targetDrive)), QString("%1confignw.txt").arg(targetPath));
 	QFile confignwFile(QString("%1confignw.txt").arg(targetPath));
@@ -3169,12 +3228,12 @@ void unetbootin::runinsthdd()
 	}
 	#endif
 	#ifdef Q_OS_WIN32
-	pdesc1->setText(tr("Configuring grldr on %1").arg(targetDev));
+//	pdesc1->setText(tr("Configuring grldr on %1").arg(targetDev));
 	if (QFile::exists(QDir::toNativeSeparators(QString("%1unetbtin.exe").arg(targetDrive))))
 	{
 		rmFile(QDir::toNativeSeparators(QString("%1unetbtin.exe").arg(targetDrive)));
 	}
-	QFile::copy(appLoc, QDir::toNativeSeparators(QString("%1unetbtin.exe").arg(targetDrive)));
+//	QFile::copy(appLoc, QDir::toNativeSeparators(QString("%1unetbtin.exe").arg(targetDrive)));
 	QFile::setPermissions(QDir::toNativeSeparators(QString("%1unetbtin.exe").arg(targetDrive)), QFile::ReadOther|QFile::WriteOther|QFile::ExeOther);
 	if (QFile::exists(QDir::toNativeSeparators(QString("%1ubnldr").arg(targetDrive))))
 	{

@@ -14,8 +14,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 #include <QtGui>
 #include <QtNetwork>
 #include <QThread>
-#include <time.h>
+#include <QMessageBox>
+#include <QFileDialog>
 //#include <QtDebug>
+
+
+#include <time.h>
 
 #include "ui_unetbootin.h"
 
@@ -23,6 +27,17 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 #include "installtaskinfo.h"
 #include "cstatusmanager.h"
 #include "cnorimagesdiff.h"
+
+
+#if QTCORE_VERSION>4
+    #include "qftp.h"
+    #include "qurlinfo.h"
+    #include "qhttp.h"
+#else
+    #include <QHttp>
+    #include <QUrlInfo>
+    #include <QFtp>
+#endif
 
 
 
@@ -146,7 +161,7 @@ public:
     static QFile *logFile;
     static QTextStream *logStream;
     QStringList loggedLinesNotYetWritten;
-	#ifdef Q_OS_UNIX
+#ifdef Q_OS_UNIX
     static QString fdiskcommand;
     static QString sfdiskcommand;
     static QString dfcommand;

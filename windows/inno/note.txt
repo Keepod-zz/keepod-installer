@@ -1,0 +1,10 @@
+
+by cmooony@gmail.com at 2014/08/12
+
+1.fix setup bug under win vista/7 
+2.add ChineseSimple and ChineseTradtional language
+
+
+1. install Inno Setup 5.5.5(u)
+2. replace SetupLdr.e32 in your install path by SetupLdr.e32
+3. add 
