@@ -88,6 +88,9 @@ win32:{
 			$${QT_PATH}/bin/Qt5Network.dll \
 			$${QT_PATH}/bin/Qt5Gui.dll \
 			$${QT_PATH}/bin/Qt5Widgets.dll \
+			$${QT_PATH}/bin/icudt52.dll \
+			$${QT_PATH}/bin/icuin52.dll \
+			$${QT_PATH}/bin/icuuc52.dll \
 			$${QT_PATH}/plugins/platforms/qwindows.dll \
 			$${QT_PATH}/plugins/platforms/qminimal.dll 
 	}else{

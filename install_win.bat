@@ -10,10 +10,12 @@
 
 @set ISCC=ISCC.exe
 
+cd /d %~dp0windows
 @echo on
-%ISCC% /qp windows/install_win.iss
+%ISCC% /qp install_win.iss
 
 @echo off
-@echo pakage OK! %CD%\windows\Keepod OS Installer.exe
+@echo pakage OK! %CD%\Keepod OS Installer.exe
 
 pause
+exit
