@@ -74,6 +74,7 @@ win32:{
     #    QT_PATH = $$(QTDIR) # it be recognized in QtCreator, not in command
     #    QT_PATH = $$[QT_INSTALL_BINS]
     !CONFIG(DEFQTPATH):    QT_PATH = $$(QTDIR)
+	!CONFIG(DEFMAKEPATH):	MAKE_PATH = $$(QTDIR)
 
     THIRDPARTY_PATH = $$PWD/windows/thirdpart
 
@@ -90,9 +91,12 @@ win32:{
 			$${QT_PATH}/bin/Qt5Widgets.dll \
 			$${QT_PATH}/bin/icudt52.dll \
 			$${QT_PATH}/bin/icuin52.dll \
-			$${QT_PATH}/bin/icuuc52.dll \
+                        $${QT_PATH}/bin/icuuc52.dll
+
+                QT_PLATFORMS_BINFILES += \
 			$${QT_PATH}/plugins/platforms/qwindows.dll \
 			$${QT_PATH}/plugins/platforms/qminimal.dll 
+
 	}else{
 		QT_BINFILES += \
 			$${QT_PATH}/bin/QtCore4.dll \
@@ -102,9 +106,9 @@ win32:{
 
 
     CPP_BINFILES += \
-        $${QT_PATH}/bin/libwinpthread-1.dll \
-        $${QT_PATH}/bin/libgcc_s_dw2-1.dll \
-        $${QT_PATH}/bin/libstd~1.dll      # libstdc++-6.dll
+        $${MAKE_PATH}/bin/libwinpthread-1.dll \
+        $${MAKE_PATH}/bin/libgcc_s_dw2-1.dll \
+        $${MAKE_PATH}/bin/libstd~1.dll      # libstdc++-6.dll
 #known as QT Bug 16372 : https://bugreports.qt-project.org/browse/QTBUG-16372
 #Using libstd~1.dll (DOS filename) as you said works for now as the bug is still unresolved as today (june 2014).
 
@@ -121,14 +125,35 @@ win32:{
             $${QT_BINFILES} \
             $${CPP_BINFILES}
 
-    DESTDIR_WIN = $$DESTDIR
+    DESTDIR_WIN = install
 
     EXTRA_BINFILES_WIN ~= s,/,\\,g
     DESTDIR_WIN ~= s,/,\\,g
 
-    for(FILE,EXTRA_BINFILES_WIN){
-        QMAKE_POST_LINK+= $$quote(cmd /c copy /y /B /N $${FILE} $${DESTDIR_WIN} $$escape_expand(\\n\\t))
-    }
+    qtlib.path = windows/$$DESTDIR
+    qtlib.files = $${QT_BINFILES}
+
+    extra.path = windows/$$DESTDIR
+    extra.files = $${EXTRA_BINFILES}
+
+    cpplib.path = windows/$$DESTDIR
+    cpplib.files = $${CPP_BINFILES}
+
+    platforms.path = windows/$$DESTDIR/platforms
+    platforms.files = $${QT_PLATFORMS_BINFILES}
+
+# add make install to Makefile
+    INSTALLS +=  \
+            extra \
+            qtlib \
+            cpplib
+
+    greaterThan( QT_MAJOR_VERSION, 4): INSTALLS += platforms
+
+
+#    for(FILE,EXTRA_BINFILES_WIN){
+#        QMAKE_POST_LINK+= $$quote(cmd /c copy /y /B /N $${FILE} $${DESTDIR_WIN} $$escape_expand(\\n\\t))
+#    }
 
 }
 

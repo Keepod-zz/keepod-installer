@@ -18,4 +18,3 @@ cd /d %~dp0windows
 @echo pakage OK! %CD%\Keepod OS Installer.exe
 
 pause
-exit
