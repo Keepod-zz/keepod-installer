@@ -68,17 +68,17 @@ greaterThan( QT_MAJOR_VERSION, 4): {
         qt4support/qhttp/qhttpauthenticator.cpp
 }
 
+THIRDPARTY_PATH = $$PWD/thirdpart
+
+INCLUDEPATH += $$THIRDPARTY_PATH/libzip/include
 
 win32:{
 
     #    QT_PATH = $$(QTDIR) # it be recognized in QtCreator, not in command
     #    QT_PATH = $$[QT_INSTALL_BINS]
-    !CONFIG(DEFQTPATH):    QT_PATH = $$(QTDIR)
-	!CONFIG(DEFMAKEPATH):	MAKE_PATH = $$(QTDIR)
+    !CONFIG(DEFQTPATH):     QT_PATH = $$(QTDIR)
+    !CONFIG(DEFMAKEPATH):   MAKE_PATH = $$(QTDIR)
 
-    THIRDPARTY_PATH = $$PWD/windows/thirdpart
-
-    INCLUDEPATH += $$THIRDPARTY_PATH/libzip/include
     LIBS += \
         -L"$$THIRDPARTY_PATH/libzip/lib" \
         -lzip
@@ -89,9 +89,9 @@ win32:{
 			$${QT_PATH}/bin/Qt5Network.dll \
 			$${QT_PATH}/bin/Qt5Gui.dll \
 			$${QT_PATH}/bin/Qt5Widgets.dll \
-			$${QT_PATH}/bin/icudt52.dll \
-			$${QT_PATH}/bin/icuin52.dll \
-                        $${QT_PATH}/bin/icuuc52.dll
+                        $${QT_PATH}/bin/icudt*.dll \
+                        $${QT_PATH}/bin/icuin*.dll \
+                        $${QT_PATH}/bin/icuuc*.dll
 
                 QT_PLATFORMS_BINFILES += \
 			$${QT_PATH}/plugins/platforms/qwindows.dll \
@@ -108,39 +108,40 @@ win32:{
     CPP_BINFILES += \
         $${MAKE_PATH}/bin/libwinpthread-1.dll \
         $${MAKE_PATH}/bin/libgcc_s_dw2-1.dll \
-        $${MAKE_PATH}/bin/libstd~1.dll      # libstdc++-6.dll
+        $${MAKE_PATH}/bin/libstdc++-6.dll      # libstdc++-6.dll
 #known as QT Bug 16372 : https://bugreports.qt-project.org/browse/QTBUG-16372
 #Using libstd~1.dll (DOS filename) as you said works for now as the bug is still unresolved as today (june 2014).
 
-
-
-    EXTRA_BINFILES += \
-        $${THIRDPARTY_PATH}/win32/bin/cyggcc_s-1.dll \
-        $${THIRDPARTY_PATH}/win32/bin/cygwin1.dll \
-        $${THIRDPARTY_PATH}/win32/bin/cygz.dll \
-        $${THIRDPARTY_PATH}/win32/bin/cygzip-3.dll
+    CYGWIN_BINFILES += \
+        $${THIRDPARTY_PATH}/cygwin/bin/cyggcc_s-1.dll \
+        $${THIRDPARTY_PATH}/cygwin/bin/cygwin1.dll \
+        $${THIRDPARTY_PATH}/cygwin/bin/cygz.dll \
+        $${THIRDPARTY_PATH}/cygwin/bin/cygzip-3.dll
 
     EXTRA_BINFILES_WIN = \
-            $${EXTRA_BINFILES} \
+            $${CYGWIN_BINFILES} \
             $${QT_BINFILES} \
             $${CPP_BINFILES}
 
-    DESTDIR_WIN = install
+    DESTDIR_WIN = $$OUT_PWD/$$DESTDIR
 
-    EXTRA_BINFILES_WIN ~= s,/,\\,g
-    DESTDIR_WIN ~= s,/,\\,g
 
-    qtlib.path = windows/$$DESTDIR
+    qtlib.path = $${DESTDIR_WIN}
     qtlib.files = $${QT_BINFILES}
 
-    extra.path = windows/$$DESTDIR
-    extra.files = $${EXTRA_BINFILES}
+    extra.path = $${DESTDIR_WIN}
+    extra.files = $${CYGWIN_BINFILES}
 
-    cpplib.path = windows/$$DESTDIR
+    cpplib.path = $${DESTDIR_WIN}
     cpplib.files = $${CPP_BINFILES}
 
-    platforms.path = windows/$$DESTDIR/platforms
+    platforms.path = $${DESTDIR_WIN}/platforms
     platforms.files = $${QT_PLATFORMS_BINFILES}
+
+#    app.path = windows/$$DESTDIR
+#    app.files = $$DESTDIR_TARGET
+# Note that qmake will skip files that are executable.
+# If you need to install executable files, you can unset the files' executable flags.
 
 # add make install to Makefile
     INSTALLS +=  \
@@ -150,6 +151,10 @@ win32:{
 
     greaterThan( QT_MAJOR_VERSION, 4): INSTALLS += platforms
 
+    EXTRA_BINFILES_WIN ~= s,/,\\,g
+    DESTDIR_WIN ~= s,/,\\,g
+
+#    QMAKE_POST_LINK += $$quote(cmd /c copy /y /B /N $$DESTDIR_TARGET $${DESTDIR_WIN} $$escape_expand(\\n\\t))
 
 #    for(FILE,EXTRA_BINFILES_WIN){
 #        QMAKE_POST_LINK+= $$quote(cmd /c copy /y /B /N $${FILE} $${DESTDIR_WIN} $$escape_expand(\\n\\t))
