@@ -19,7 +19,7 @@ void CNorChangedBlocks::unzip ( QString i_szFileName )
 
 #ifdef Q_OS_MAC
 
-#endif
+#else
 
     // get file handle of the zip file.
     zip *pZipArchive = zip_open(i_szFileName.toUtf8(), 0, NULL);
@@ -66,7 +66,7 @@ void CNorChangedBlocks::unzip ( QString i_szFileName )
 
     zip_close(pZipArchive);
 
-
+#endif
 }
 
 STChangedFileInfo** CNorChangedBlocks::extract ( int *o_nItemCount )

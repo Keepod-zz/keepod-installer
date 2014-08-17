@@ -40,6 +40,7 @@ QString unetbootin::installType = "";
 QString unetbootin::sevzcommand = "";
 QFile* unetbootin::logFile = NULL;
 QTextStream* unetbootin::logStream = NULL;
+QString unetbootin::targetDev = "";
 
 #ifdef Q_OS_UNIX
 QString unetbootin::fdiskcommand = "";

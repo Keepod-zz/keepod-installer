@@ -3,7 +3,7 @@ TARGET = keepod-installer
 
 CONFIG += static
 
-DESTDIR = bin
+DESTDIR = $$OUT_PWD/bin
 
 LIBS += -L$$DESTDIR
 
@@ -162,3 +162,25 @@ win32:{
 
 }
 
+
+macx:{
+#    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
+    LIBS +=
+
+#keepod-installer.app/Contents/MacOS/keepod-installer:
+#	QtGui.framework/Versions/4/QtGui (compatibility version 4.8.0, current version 4.8.6)
+#	QtCore.framework/Versions/4/QtCore (compatibility version 4.8.0, current version 4.8.6)
+#	QtNetwork.framework/Versions/4/QtNetwork (compatibility version 4.8.0, current version 4.8.6)
+#	/usr/lib/libstdc++.6.dylib (compatibility version 7.0.0, current version 60.0.0)
+#	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1197.1.1)
+#	/usr/lib/libgcc_s.1.dylib (compatibility version 1.0.0, current version 2577.0.0)
+
+    cpplib.path = $$DESTDIR/keepod-installer.app/Contents/dylib
+    cpplib.files += \
+        /usr/lib/libstdc++.6.dylib \
+        /usr/lib/libSystem.B.dylib \
+        /usr/lib/libgcc_s.1.dylib
+
+    INSTALLS += \
+            cpplib
+}
