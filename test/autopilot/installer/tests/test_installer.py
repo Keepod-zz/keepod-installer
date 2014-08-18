@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from autopilot.testcase import AutopilotTestCase
 from os.path import abspath, dirname, join
 
