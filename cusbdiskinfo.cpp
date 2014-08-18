@@ -3,6 +3,12 @@
 
 #include <QStringList>
 
+#ifdef Q_OS_WIN
+    #include <windows.h>
+    typedef BOOL (WINAPI *P_GDFSE)(LPCTSTR, PULARGE_INTEGER,
+                               PULARGE_INTEGER, PULARGE_INTEGER);
+#endif
+
 CUsbDiskInfo::CUsbDiskInfo(QObject *parent) :
     QObject(parent)
 {
@@ -176,7 +182,7 @@ void CUsbDiskInfo::setInfoByDevname ( QString devname )
 #ifdef OLD_VERSION
     this->m_llSizeKb = getSizeKbFromDevname();
 #else
-    this->m_llSizeKb = getBlockSizeKb(getDevNodeName());
+    this->m_llSizeKb = getBlockSizeKb(devname/*getDevNodeName()*/);
 #endif
     //this->m_szModel = getModelFromDevname();
     //this->uuid = getUuidFromDevname();
@@ -253,9 +259,90 @@ QString CUsbDiskInfo::getNewMountPoint()
 // i_szDev: "sdc"
 quint64 CUsbDiskInfo::getBlockSizeKb ( QString i_szDev )
 {
+    quint64 llSizeKb = 0;
+
+#ifdef Q_OS_WIN
+    // note: under windows i_szDev format "C:\";
+//    quint64 nFreeBytesAvailable = 0;
+//    quint64 nTotalNumberOfBytes = 0;
+//    quint64 nTotalNumberOfFreeBytes = 0;
+//    if(GetDiskFreeSpaceEx(LPWSTR(i_szDev.utf16()),
+//                          (PULARGE_INTEGER) &nFreeBytesAvailable,
+//                          (PULARGE_INTEGER) &nTotalNumberOfBytes,
+//                          (PULARGE_INTEGER) &nTotalNumberOfFreeBytes))
+//    {
+//        llSizeKb = nTotalNumberOfBytes;
+//    }
+
+    BOOL  fResult;
+
+    DWORD dwSectPerClust = 0,
+            dwBytesPerSect = 0,
+            dwFreeClusters = 0,
+            dwTotalClusters = 0;
+
+    P_GDFSE pGetDiskFreeSpaceEx = NULL;
+
+    unsigned __int64 i64FreeBytesToCaller = 0,
+            i64TotalBytes = 0,
+            i64FreeBytes = 0;
+
+    pGetDiskFreeSpaceEx = (P_GDFSE)GetProcAddress (
+                GetModuleHandle (LPWSTR("kernel32.dll")),
+                "GetDiskFreeSpaceExA");
+
+    if (pGetDiskFreeSpaceEx)
+    {
+        fResult = pGetDiskFreeSpaceEx (LPWSTR(i_szDev.utf16()),
+                                       (PULARGE_INTEGER)&i64FreeBytesToCaller,
+                                       (PULARGE_INTEGER)&i64TotalBytes,
+                                       (PULARGE_INTEGER)&i64FreeBytes);
+        if (fResult)
+        {
+            printf ("\n\nGetDiskFreeSpaceEx reports\n\n");
+            printf ("Available space to caller = %I64u MB\n",
+                    i64FreeBytesToCaller / (1024*1024));
+            printf ("Total space               = %I64u MB\n",
+                    i64TotalBytes / (1024*1024));
+            printf ("Free space on drive       = %I64u MB\n",
+                    i64FreeBytes / (1024*1024));
+        }
+    }
+    else
+    {
+        fResult = GetDiskFreeSpace (LPWSTR(i_szDev.utf16()),
+                                    &dwSectPerClust,
+                                    &dwBytesPerSect,
+                                    &dwFreeClusters,
+                                    &dwTotalClusters);
+        if (fResult)
+        {
+            /* force 64-bit math */
+            i64TotalBytes = (__int64)dwTotalClusters * dwSectPerClust *
+                    dwBytesPerSect;
+            i64FreeBytes = (__int64)dwFreeClusters * dwSectPerClust *
+                    dwBytesPerSect;
+
+            printf ("GetDiskFreeSpace reports\n\n");
+            printf ("Free space  = %I64u MB\n",
+                    i64FreeBytes / (1024*1024));
+            printf ("Total space = %I64u MB\n",
+                    i64TotalBytes / (1024*1024));
+        }
+    }
+
+    llSizeKb = i64TotalBytes;
+
+    if (!fResult)
+    {
+        qDebug()<<GetLastError()<<"error: could not get free space for " << i_szDev;
+    }
+
+#endif
+
+#ifdef Q_OS_LINUX
     QString szCmdOut = QString(unetbootin::callexternapp("cat","/proc/partitions"));
     QStringList szLines = szCmdOut.split("\n");
-    quint64 llSizeKb = 0;
 
     for ( int i=0; i<szLines.size(); i++ ) {
         QString szALine = szLines.at(i);
@@ -272,6 +359,7 @@ quint64 CUsbDiskInfo::getBlockSizeKb ( QString i_szDev )
             break;
         }
     }
+#endif
 
     return llSizeKb;
 }

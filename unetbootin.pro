@@ -11,6 +11,9 @@ QT += core \
     gui \
     network
 
+# no strip for executable files
+QMAKE_STRIP = echo
+
 DEPENDPATH += .
 
 INCLUDEPATH += .
@@ -82,27 +85,52 @@ win32:{
     LIBS += \
         -L"$$THIRDPARTY_PATH/libzip/lib" \
         -lzip
-		
-	greaterThan( QT_MAJOR_VERSION, 4): {
-		QT_BINFILES += \
-			$${QT_PATH}/bin/Qt5Core.dll \
-			$${QT_PATH}/bin/Qt5Network.dll \
-			$${QT_PATH}/bin/Qt5Gui.dll \
-			$${QT_PATH}/bin/Qt5Widgets.dll \
-                        $${QT_PATH}/bin/icudt*.dll \
-                        $${QT_PATH}/bin/icuin*.dll \
-                        $${QT_PATH}/bin/icuuc*.dll
 
-                QT_PLATFORMS_BINFILES += \
-			$${QT_PATH}/plugins/platforms/qwindows.dll \
-			$${QT_PATH}/plugins/platforms/qminimal.dll 
+        CONFIG(debug, debug|release) {
+            greaterThan( QT_MAJOR_VERSION, 4): {
+                    QT_BINFILES += \
+                            $${QT_PATH}/bin/Qt5Core*.dll \
+                            $${QT_PATH}/bin/Qt5Network*.dll \
+                            $${QT_PATH}/bin/Qt5Gui*.dll \
+                            $${QT_PATH}/bin/Qt5Widgets*.dll \
+                            $${QT_PATH}/bin/icudt*.dll \
+                            $${QT_PATH}/bin/icuin*.dll \
+                            $${QT_PATH}/bin/icuuc*.dll
 
-	}else{
-		QT_BINFILES += \
-			$${QT_PATH}/bin/QtCore4.dll \
-			$${QT_PATH}/bin/QtNetwork4.dll \
-			$${QT_PATH}/bin/QtGui4.dll
-	}
+                    QT_PLATFORMS_BINFILES += \
+                            $${QT_PATH}/plugins/platforms/qwindows*.dll \
+                            $${QT_PATH}/plugins/platforms/qminimal*.dll
+
+            }else{
+                    QT_BINFILES += \
+                            $${QT_PATH}/bin/QtCore4*.dll \
+                            $${QT_PATH}/bin/QtNetwork4*.dll \
+                            $${QT_PATH}/bin/QtGui4*.dll
+            }
+
+        }else{
+
+            greaterThan( QT_MAJOR_VERSION, 4): {
+                    QT_BINFILES += \
+                            $${QT_PATH}/bin/Qt5Core.dll \
+                            $${QT_PATH}/bin/Qt5Network.dll \
+                            $${QT_PATH}/bin/Qt5Gui.dll \
+                            $${QT_PATH}/bin/Qt5Widgets.dll \
+                            $${QT_PATH}/bin/icudt*.dll \
+                            $${QT_PATH}/bin/icuin*.dll \
+                            $${QT_PATH}/bin/icuuc*.dll
+
+                    QT_PLATFORMS_BINFILES += \
+                            $${QT_PATH}/plugins/platforms/qwindows.dll \
+                            $${QT_PATH}/plugins/platforms/qminimal.dll
+
+            }else{
+                    QT_BINFILES += \
+                            $${QT_PATH}/bin/QtCore4.dll \
+                            $${QT_PATH}/bin/QtNetwork4.dll \
+                            $${QT_PATH}/bin/QtGui4.dll
+            }
+        }
 
 
     CPP_BINFILES += \
@@ -118,19 +146,19 @@ win32:{
         $${THIRDPARTY_PATH}/cygwin/bin/cygz.dll \
         $${THIRDPARTY_PATH}/cygwin/bin/cygzip-3.dll
 
-    EXTRA_BINFILES_WIN = \
-            $${CYGWIN_BINFILES} \
-            $${QT_BINFILES} \
-            $${CPP_BINFILES}
+    OTHER_BINFILES += \
+        $${THIRDPARTY_PATH}/dcfldd/bin/dcfldd.exe \
+        $${THIRDPARTY_PATH}/dd/bin/dd.exe \
+        $${THIRDPARTY_PATH}/md5sum/bin/md5sum.exe
 
-    DESTDIR_WIN = $$OUT_PWD/$$DESTDIR
+    DESTDIR_WIN = $$DESTDIR
 
 
     qtlib.path = $${DESTDIR_WIN}
     qtlib.files = $${QT_BINFILES}
 
-    extra.path = $${DESTDIR_WIN}
-    extra.files = $${CYGWIN_BINFILES}
+    cygwin.path = $${DESTDIR_WIN}
+    cygwin.files = $${CYGWIN_BINFILES}
 
     cpplib.path = $${DESTDIR_WIN}
     cpplib.files = $${CPP_BINFILES}
@@ -138,27 +166,18 @@ win32:{
     platforms.path = $${DESTDIR_WIN}/platforms
     platforms.files = $${QT_PLATFORMS_BINFILES}
 
-#    app.path = windows/$$DESTDIR
-#    app.files = $$DESTDIR_TARGET
-# Note that qmake will skip files that are executable.
-# If you need to install executable files, you can unset the files' executable flags.
+    other.path = $${DESTDIR_WIN}
+    other.files = $${OTHER_BINFILES}
 
 # add make install to Makefile
     INSTALLS +=  \
-            extra \
             qtlib \
-            cpplib
+            cpplib \
+            cygwin \
+            other
+
 
     greaterThan( QT_MAJOR_VERSION, 4): INSTALLS += platforms
-
-    EXTRA_BINFILES_WIN ~= s,/,\\,g
-    DESTDIR_WIN ~= s,/,\\,g
-
-#    QMAKE_POST_LINK += $$quote(cmd /c copy /y /B /N $$DESTDIR_TARGET $${DESTDIR_WIN} $$escape_expand(\\n\\t))
-
-#    for(FILE,EXTRA_BINFILES_WIN){
-#        QMAKE_POST_LINK+= $$quote(cmd /c copy /y /B /N $${FILE} $${DESTDIR_WIN} $$escape_expand(\\n\\t))
-#    }
 
 }
 
