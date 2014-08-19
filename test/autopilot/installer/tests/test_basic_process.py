@@ -104,15 +104,17 @@ class BasicProcessTests(installerTestBase):
         exitFlag = self.app_handle_no_usb_disks_msg()
         if(RET_SUCCESS == exitFlag):
             return
+
+        self.app_do_checkbox_udisk(0)
+        self.app_do_checkbox_udisk(1)
         
         # go to main win position
         self.app_do_move_mouse_2_mainwin()
-        
-        # check "download and install..." box
-        self.app_do_checkbox_download()
+        self.app_do_load_local_img()
         
         # choose usb stick, such as /dev/sdb.
         self.app_do_checkbox_udisk(0)
+        self.app_do_checkbox_udisk(1)
 
         # press "make it" button
         self.app_do_pushbutton_makeit()
