@@ -1,12 +1,11 @@
 
 :: by cmooony@gmail.com at 2014/08/12
 
+:: ensure QT_DIR is in system PATH.
 :: ensure qmake and make are in system PATH.
-:: ensure QT_DIR is in system envirement.
 :: 
 :: example:
-:: set QT_DIR=E:\Qt\4.8.6
-:: set QMAKE_DIR=%QT_DIR%\bin
+:: set QMAKE_DIR=E:\Qt\4.8.6\bin
 :: set MAKE_DIR=E:\Qt\Qt5.3.1\Tools\mingw482_32\bin
 :: setx PATH "%PATH%;%MAKE_DIR%;%QMAKE_DIR%"
 
@@ -14,40 +13,61 @@
 
 @set QMAKE=qmake.exe
 @set MAKE=mingw32-make.exe
-@set QT_DIR=
+@set QMAKE_DIR=
+@set MAKE_DIR=
+@set COPY=cmd /c copy /y /B /N
 
 @set b=1
 :labelFor
-@for /f "tokens=%b% delims=;" %%s in ("%path%") do (
-	@set QT_DIR=
-	@set /a b+=1
-	if exist %%s\%QMAKE% (
-		@set "QT_DIR=%%s"
-		goto :labelQtFound
+	@for /f "tokens=%b% delims=;" %%s in ("%path%") do (	
+		@echo %%s
+		
+		if not defined MAKE_DIR (
+			if exist %%s\%MAKE% (
+				@set "MAKE_DIR=%%s"
+			)
+		)
+		
+		if not defined QMAKE_DIR (
+			if exist %%s\%QMAKE% (
+				@set "QMAKE_DIR=%%s"
+			)
+		)
+		
+		
+		@set /a b+=1	
+	) && goto :labelFor
+
+if not defined QMAKE_DIR  (
+	@echo ERROR! %QMAKE% NOT FOUND!
+	goto :exit
 	)
-) && goto :labelFor
+	
+if not defined MAKE_DIR (
+	@echo ERROR! %MAKE% NOT FOUND!
+	goto :exit
+	)	
 
-if defined QT_DIR ( goto :labelQtFound ) else (goto :labelQtNotFound)
+@echo OK! %MAKE% FOUND in %MAKE_DIR% 
+@echo OK! %QMAKE% FOUND in %QMAKE_DIR%
 
-:labelQtFound
-	@set QT_DIR=%QT_DIR:~0,-4%
-	echo OK! QT_DIR FOUND %QT_DIR%
-	::pause
+@set QT_PATH=%QMAKE_DIR:~0,-4%
+@echo %QT_PATH%
+@set MAKE_PATH=%MAKE_DIR:~0,-4%
+@echo %MAKE_PATH%
 
-:make	
+:: pause
+	
+:labelMake	
 	cd /d %~dp0windows
 
-	%QMAKE% ..\ -r -spec win32-g++ "CONFIG+=release DEFQTPATH" QT_PATH=%QT_DIR%
+	%QMAKE% ..\ -r -spec win32-g++ "CONFIG+=release static DEFQTPATH DEFMAKEPATH" QT_PATH=%QT_PATH% MAKE_PATH=%MAKE_PATH%
 	%MAKE% clean
 	%MAKE% 
+	%MAKE% install
 
 	cd ..
-	goto :exit
-
-
-:labelQtNotFound
-	@echo ERROR! qmake NOT FOUND!	
 
 :exit
-	@echo build in directory %CD%\windows\bin exit
-	:pause
+	@echo OK! build in directory %CD%\windows\bin
+	pause

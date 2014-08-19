@@ -6,7 +6,10 @@
 *.la
 *.lai
 *.so
-*.dylib
+#*.dylib
+#*.dll
+#*.a
+*.DS_Store
 
 # Qt-es
 

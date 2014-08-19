@@ -147,7 +147,7 @@ public:
 	QString targetDrive;
 	QString targetPath;
     static QString installType;
-	QString targetDev;
+	static QString targetDev;   // by cmooony@gmail.com
 	QString rawtargetDev;
 	QString devluid;
 	QString devlabel;

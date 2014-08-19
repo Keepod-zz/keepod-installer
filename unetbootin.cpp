@@ -40,6 +40,7 @@ QString unetbootin::installType = "";
 QString unetbootin::sevzcommand = "";
 QFile* unetbootin::logFile = NULL;
 QTextStream* unetbootin::logStream = NULL;
+QString unetbootin::targetDev = "";
 
 #ifdef Q_OS_UNIX
 QString unetbootin::fdiskcommand = "";
@@ -268,7 +269,7 @@ bool unetbootin::ubninitialize(/*QList<QPair<QString, QString> > oppairs*/)
 	overwriteall = false;
 
 #ifdef Q_OS_MAC
-	resourceDir = QDir(QApplication::applicationDirPath());
+    QDir resourceDir = QDir(QApplication::applicationDirPath());
 	resourceDir.cdUp();
 	resourceDir.cd("Resources");
 	syslinuxcommand = resourceDir.absoluteFilePath("syslinux-mac");
@@ -347,7 +348,7 @@ QStringList unetbootin::listcurdrives()
 
 QStringList unetbootin::listsanedrives()
 {
-    // !!!!!!!!!! BUG !!!!!!!!!! ²»ÄÜÊ¶±ð³öÒÆ¶¯Ó²ÅÌ at 2014/08/11  fixed by cmoooony@gmail.com
+    // !!!!!!!!!! BUG !!!!!!!!!! ä¸èƒ½è¯†åˆ«å‡ºç§»åŠ¨ç¡¬ç›˜ at 2014/08/11  fixed by cmoooony@gmail.com
 	QStringList fulldrivelist;
 
     #ifdef Q_OS_WIN32
@@ -398,7 +399,7 @@ QStringList unetbootin::listsanedrives()
                                                 pDevDesc, pDevDesc->Size, // output data buffer
                                                 &dwOutBytes, // out's length
                                                 (LPOVERLAPPED)NULL);
-                    if(bResult && pDevDesc->BusType == BusTypeUsb)  // This is the ¡®Check Point¡¯!!! ;-)
+                    if(bResult && pDevDesc->BusType == BusTypeUsb)  // This is the â€˜Check Pointâ€™!!! ;-)
                     {
                         // We store the drive letter here
                         fulldrivelist.append(QDir::toNativeSeparators(sPath));
