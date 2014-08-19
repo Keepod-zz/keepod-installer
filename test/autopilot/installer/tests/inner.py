@@ -45,6 +45,13 @@ class MsgHandler():
         self.duration = duration
         self.app = app
         self.test = test
+        self.stateErrTable = [
+            MSG_DOWNLOAD_FAILED,
+            MSG_WRITE_FAILED,
+            MSG_PREPARE_ERROR,
+            MSG_REPARTITION_FAILED,
+            MSG_MD5_MISMATCH,
+        ]
         self.msgMap = {
             MSG_NO_USB_DISKS:self.msg_single_ok,
             MSG_NO_SELECTED_DEVICE:self.msg_single_ok,
@@ -62,6 +69,9 @@ class MsgHandler():
             MSG_INSTALL_GRUB:self.msg_double_yes_no,
         }
         return
+
+    def get_err_states(self):
+        return self.stateErrTable
     
     def get_msg_box(self, msg):
         """ check whether we have this msg pop dialog """

@@ -39,11 +39,13 @@ this the the auto test intro for keepod-installer based on autopilot
 3. build the keepod-installer from source;
    
     $ cd path/to/source/of/keepod-installer
+    
     $ ./build-nonstatic
    
 4. launch auto test;
 
     $ cd ./test/autopilot
+    
     $ ./launch_test.sh
     
 5. check the software proceeding situation 

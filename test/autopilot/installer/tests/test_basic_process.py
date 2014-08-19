@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from autopilot.testcase import AutopilotTestCase
-from os.path import abspath, dirname, join
+from autopilot.matchers import Eventually
+from testtools.matchers import Equals
 
+from os.path import abspath, dirname, join
 import time
 import logging
 
@@ -13,8 +15,10 @@ from inner import *
 class BasicProcessTests(installerTestBase):
     """ basic process for installer """
 
-    def test_basic_net_downloading_process(self):
-        """ basic test process with downloading iso from net """
+    def _test_single_udisk_installing_with_net_img(self):
+        """ test routine:
+                single udisk installing process with image from network
+        """
         self.log_setup()
         # launch application
         self.app_setup()
@@ -29,7 +33,7 @@ class BasicProcessTests(installerTestBase):
         self.app_do_move_mouse_2_mainwin()
         
         # check "download and install..." box
-        self.app_do_checkbox_download(True, None)
+        self.app_do_checkbox_download()
         
         # choose usb stick, such as /dev/sdb.
         self.app_do_checkbox_udisk(0)
@@ -41,16 +45,19 @@ class BasicProcessTests(installerTestBase):
         exitFlag = self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
         
-        # after making finished and showing popup dialog,
-        # press "OK" button and exit installer
-        
-        # TODO: wait_signal and then move mouse to new popbox
+        # wait to complete installing   
+        ret = self.app_do_statewin_wait_completed(-1)
+        self.assertTrue(ret)
 
-        # process msgbox of "Completed" or some else
+        # our completed info button will kill application
+        # this will cause autipilot identify this as a failed test
+        self.app_handle_completed_msg()
         return
     
-    def test_basic_local_loading_process(self):
-        """ basic test process with loading iso from local path """
+    def test_single_udisk_installing_with_local_img(self):
+        """ test routine:
+                single udisk installing process with image from local path
+        """
         self.log_setup()
         # launch application
         self.app_setup()
@@ -75,54 +82,18 @@ class BasicProcessTests(installerTestBase):
         exitFlag = self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
 
-        self.app_sleep(2)
-        # after making finished and showing popup dialog,
-        # press "OK" button and exit installer
-        
-        # TODO: wait_signal and then move mouse to new popbox
+        # wait to complete installing
+        ret = self.app_do_statewin_wait_completed(-1)
+        self.assertTrue(ret)
 
-        # process msgbox of "Completed" or some else       
+        # our completed info button will kill application
+        # this will cause autipilot identify this as a failed test
+        self.app_handle_completed_msg()
         return
     
-    def test_choose_all_disks_process(self):
-        """ choose all udisks to process test routine"""
-        self.log_setup()
-        # launch application
-        self.app_setup()
-        
-        # what if we don't have usb stick mounted
-        # check if we have msgbox and push it
-        exitFlag = self.app_handle_no_usb_disks_msg()
-        if(RET_SUCCESS == exitFlag):
-            return
-        
-        # go to main win position
-        self.app_do_move_mouse_2_mainwin()
-        
-        # check "download and install..." box
-        self.app_do_checkbox_download(True, None)
-        
-        # choose usb stick, such as /dev/sdb.
-        self.app_do_checkbox_udisk(0)
-
-        # press "make it" button
-        self.app_do_pushbutton_makeit()
-        
-        # process msg box poped up after clicking "make it"   
-        exitFlag = self.app_handle_confirm_build_msg(True)
-        self.app_do_move_mouse_2_mainwin()
-        
-        # after making finished and showing popup dialog,
-        # press "OK" button and exit installer
-        
-        # TODO: wait_signal and then move mouse to new popbox
-
-        # process msgbox of "Completed" or some else
-        return
-
-    def test_iso_downloading_cancel_and_continue(self):
-        """ after preparation, we begin writting to udisk ,
-            then we cancel the operation and the continue this process
+    def test_multi_udisk_installing_with_local_img(self):
+        """ test routine:
+                multi udisk installing process with iamge from local path
         """
         self.log_setup()
         # launch application
@@ -138,32 +109,32 @@ class BasicProcessTests(installerTestBase):
         self.app_do_move_mouse_2_mainwin()
         
         # check "download and install..." box
-        self.app_do_checkbox_download(True, None)
+        self.app_do_checkbox_download()
         
         # choose usb stick, such as /dev/sdb.
         self.app_do_checkbox_udisk(0)
 
         # press "make it" button
         self.app_do_pushbutton_makeit()
-        self.app_handle_confirm_build_msg(True)
+        
+        # process msg box poped up after clicking "make it"   
+        exitFlag = self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
-        # then we will begin downloading
-        self.app_sleep(20)
+        
+        # wait to complete installing
+        ret = self.app_do_statewin_wait_completed(-1)
+        self.assertTrue(ret)
 
-        # cancel the downloading process and then restart writting
-        self.app_do_pushbutton_makeit()
-        self.app_handle_confirm_cancel_msg(True)
-        self.app_sleep(2)
-        self.app_handle_canceled_msg()
-        self.app_do_move_mouse_2_mainwin()
-        self.app_sleep(2)
-        self.app_do_pushbutton_makeit()
-        self.app_handle_confirm_build_msg(True)
-        self.app_do_move_mouse_2_mainwin()
-        self.app_sleep(2)
+        # our completed info button will kill application
+        # this will cause autipilot identify this as a failed test
+        self.app_handle_completed_msg()
         return
 
-    def test_udisk_writting_cancel_and_continue(self):
+    def test_single_udisk_downloading_cancel_and_continue_with_net_image(self):
+        """ test routine:
+                after preparation, we begin downloading image from network ,
+                then we cancel downloading operation and then continue this process
+        """
         self.log_setup()
         # launch application
         self.app_setup()
@@ -178,32 +149,93 @@ class BasicProcessTests(installerTestBase):
         self.app_do_move_mouse_2_mainwin()
         
         # check "download and install..." box
-        self.app_do_checkbox_download(True, None)
+        self.app_do_checkbox_download()
+        
+        # choose usb stick, such as /dev/sdb.
+        self.app_do_checkbox_udisk(0)
+
+        # press "make it" button and start downloading
+        self.app_do_pushbutton_makeit()
+        self.app_handle_confirm_build_msg(True)
+        self.app_do_move_mouse_2_mainwin()
+        
+        # then we wait for 4.0 percent
+        ret = self.app_do_statewin_wait_download(4.0)
+        self.assertTrue(ret)
+
+        # cancel the downloading process
+        self.app_do_pushbutton_makeit()
+        self.app_handle_confirm_cancel_msg(True)
+
+        # handle canceled message
+        self.app_handle_canceled_msg()
+        self.app_do_move_mouse_2_mainwin()
+
+        # continue process and remake it
+        self.app_do_pushbutton_makeit()
+        # handle confirm message
+        self.app_handle_confirm_build_msg(True)
+        self.app_do_move_mouse_2_mainwin()
+        self.app_sleep(2)
+        return
+
+    def test_single_udisk_writting_cancel_and_continue_with_local_img(self):
+        """ test routine:
+            after preparation, we begin writting to udisk ,
+            then we cancel the writting operation and then continue this process
+        """
+        self.log_setup()
+        # launch application
+        self.app_setup()
+        
+        # what if we don't have usb stick mounted
+        # check if we have msgbox and push it
+        exitFlag = self.app_handle_no_usb_disks_msg()
+        if(RET_SUCCESS == exitFlag):
+            return
+        
+        # go to main win position
+        self.app_do_move_mouse_2_mainwin()
+        
+        # check "download and install..." box
+        self.app_do_move_mouse_2_mainwin()
+        self.app_do_load_local_img()
         
         # choose usb stick, such as /dev/sdb.
         self.app_do_checkbox_udisk(0)
 
         # press "make it" button
         self.app_do_pushbutton_makeit()
+        # handle confirm message and begin writting
         self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
-        # then we will begin downloading
-        self.app_sleep(20)
-
-        # cancel the downloading process and then restart writting
+        
+        # then we wait writting for 5.0 percent
+        ret = self.app_do_statewin_wait_writting(6)
+        self.assertTrue(ret)
+        
+        # cancel the writting process
         self.app_do_pushbutton_makeit()
+        # handle cancel confirmed message
         self.app_handle_confirm_cancel_msg(True)
-        self.app_sleep(2)
+
+        # wait canceld pop-box
+        self.app_wait_msg_pop(MSG_CANCELED)
+        
+        # handle canceled message
         self.app_handle_canceled_msg()
         self.app_do_move_mouse_2_mainwin()
-        self.app_sleep(2)
+        
+        # restart writting process
         self.app_do_pushbutton_makeit()
         self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
-        self.app_sleep(2)
         return
 
-    def test_udisk_files_md5_check_valid(self):
+    def test_single_udisk_md5_check(self):
+        """ test routine:
+                md5 check for udisk files
+        """
         return
 
     def app_setup(self):
@@ -260,20 +292,16 @@ class BasicProcessTests(installerTestBase):
         self.app_sleep(1)
         return
     
-    def app_do_checkbox_download(self, bCheck, path):
-        """ check whether we download iso from net or loading from local path """
-        if(bCheck):
-            # choose to download from internet over http or ftp
-            checkBox = self.app.select_single('QCheckBox', objectName='chkDownloadLatest')
-            mx, my = (checkBox.globalRect.x + 5), (checkBox.globalRect.y + 5)
-            self.mouse.move(mx, my)
-            self.mouse.click()
-            self.app_sleep(2)
-            return
-        else:
-            # choose one iso file to load
-            return
-        
+    def app_do_checkbox_download(self):
+        """ check download box """
+        # choose to download from internet over http or ftp
+        checkBox = self.app.select_single('QCheckBox', objectName='chkDownloadLatest')
+        mx, my = (checkBox.globalRect.x + 5), (checkBox.globalRect.y + 5)
+        self.mouse.move(mx, my)
+        self.mouse.click()
+        self.app_sleep(2)
+        return
+
     def _move_to_check_box_of_udisk(self, num, tabview):
         rowHeight = 30
         boxXOffset = 10
@@ -298,6 +326,82 @@ class BasicProcessTests(installerTestBase):
         self.app_sleep(2)
         self.mouse.click()
         return
+
+    def _statewin_check_error(self, text):
+        """ check error state of state window """
+        if(text in self.msgHandler.get_err_states()):
+            return True
+        else:
+            return False
+
+    def app_do_statewin_wait_download(self, percent):
+        if(percent > 100.0):
+            percent = 100.0
+        
+        msgLen = len(MSG_DOWNLOADING)
+        stateWin = self.app.select_single('QLabel', objectName='lblStatus')
+        while(1):
+            curr = stateWin.text
+            self.log_info('StateWin', curr)
+            # in order to prevent failed message from hanging test
+            if(self._statewin_check_error(curr)):
+                return False
+            
+            percentCurStr = curr[msgLen:-1]
+            if('.' in percentCurStr):
+                percentCur = float(percentCurStr)
+                if(percentCur >= percent):
+                    return True
+            time.sleep(2)
+        return True
+
+    def app_do_statewin_wait_writting(self, timeout):
+        timeout_count = 0
+        stateWin = self.app.select_single('QLabel', objectName='lblStatus')
+        while(1):
+            curr = stateWin.text
+            self.log_info('StateWin', curr)
+            if(self._statewin_check_error(curr)):
+                    return False
+                
+            if(MSG_WRITING == curr):
+                timeout_count = timeout_count + 1
+
+            if(timeout_count > timeout):
+                break
+        return True
+    
+    def app_do_statewin_wait_completed(self, timeout):
+        timeout_count = 0
+        stateWin = self.app.select_single('QLabel', objectName='lblStatus')
+       
+        while(1):
+            curr = stateWin.text
+            if(MSG_COMPLETED == curr):
+                self.log_info('StateWin', curr)
+                break
+            else:
+                if(-1 != timeout and timeout_count > timeout):
+                    break
+
+                # in order to prevent failed message from hanging test
+                if(self._statewin_check_error(curr)):
+                    return False
+                
+                self.log_info('StateWin', curr)
+                timeout_count = timeout_count + 1
+                time.sleep(1)
+        return True
+
+    def app_wait_msg_pop(self, msg):
+        """ wait for specified msgbox to pop up """
+        while(1):
+            mbox = self.msgHandler.get_msg_box(msg)
+            if(mbox != None):
+                break
+            time.sleep(1)
+        return
+            
     
     def app_handle_no_selected_device_msg(self):
         mbox = self.msgHandler.get_msg_box(MSG_NO_SELECTED_DEVICE)
@@ -406,9 +510,10 @@ class BasicProcessTests(installerTestBase):
         else:
             mbox_process(mbox, bSure)
             return RET_SUCCESS
-        
+    
     def log_setup(self):
         self.logger = logging.getLogger(__name__)
+        return
         
     def log_info(self, head, msg):
         msg = "%s: %s" %(head, msg)
