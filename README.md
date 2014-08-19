@@ -33,7 +33,7 @@ this the the auto test intro for keepod-installer based on autopilot
 
 download the pre-required software, including python and autopilot-desktop;
 
-    * apt-based GNU/Linux Distribution (debian, ubuntu, mint, etc)
+* apt-based GNU/Linux Distribution (debian, ubuntu, mint, etc)
     
         $ sudo apt-get install autopilot-desktop
 
