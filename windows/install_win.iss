@@ -81,9 +81,9 @@ Name: "chinesesimp"; MessagesFile: "compiler:Languages\ChineseSimp.isl"
 ;Source: "{#QT_PATH}\bin\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 ;Source: "{#QT_PATH}\bin\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; 程序
-Source: "{#MyAppFilePath}\*.exe"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-Source: "{#MyAppFilePath}\*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-Source: "{#MyAppFilePath}\*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#MyAppFilePath}\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+;Source: "{#MyAppFilePath}\*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+;Source: "{#MyAppFilePath}\*.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 ; 注意: 不要在任何共享系统文件上使用“Flags: ignoreversion”
  
 ;[Tasks]

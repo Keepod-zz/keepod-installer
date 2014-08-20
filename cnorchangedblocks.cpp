@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "unetbootin.h"
 
+
 #include "zip.h"
 
 int CNorChangedBlocks::s_nExtractedCount = 0;
@@ -15,6 +16,11 @@ CNorChangedBlocks::CNorChangedBlocks(QObject *parent) :
 
 void CNorChangedBlocks::unzip ( QString i_szFileName )
 {
+
+#ifdef Q_OS_MAC
+
+#else
+
     // get file handle of the zip file.
     zip *pZipArchive = zip_open(i_szFileName.toUtf8(), 0, NULL);
 
@@ -59,6 +65,8 @@ void CNorChangedBlocks::unzip ( QString i_szFileName )
     }
 
     zip_close(pZipArchive);
+
+#endif
 }
 
 STChangedFileInfo** CNorChangedBlocks::extract ( int *o_nItemCount )
