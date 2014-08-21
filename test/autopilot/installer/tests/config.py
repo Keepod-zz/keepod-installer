@@ -12,6 +12,7 @@ class TestConfig:
         self.config = ConfigParser.ConfigParser()
         rpath = dirname(__file__) + '/test.ini'
         self.imgpath = abspath(dirname(__file__) + '/keepod-latest.zip')
+        self.md5path = abspath(dirname(__file__) + '/md5sum.txt')
         self.cfgFile = abspath(rpath)
         
         if(os.path.isfile(self.cfgFile)):
@@ -25,7 +26,8 @@ class TestConfig:
         """ create sample ini file """
         self.config.add_section('local')
         self.config.add_section('net')
-        self.config.set('local', 'path', self.imgpath)
+        self.config.set('local', 'image', self.imgpath)
+        self.config.set('local', 'md5', self.md5path)
         self.config.set('net', 'url', 'http://ci.keepod.org/release/')
         self.config.set('net', 'name', 'keepod-latest.zip')
         self.config.set('net', 'md5', 'md5sum.txt')
@@ -45,4 +47,8 @@ class TestConfig:
         return self.config.get('net','url')+self.config.get('net','md5')
 
     def get_img_local_file(self):
-        return self.config.get('local','path')
+        return self.config.get('local','image')
+
+    def get_img_local_md5(self):
+        return self.config.get('local','md5')
+        

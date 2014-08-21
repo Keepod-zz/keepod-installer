@@ -9,13 +9,13 @@ import time
 import logging
 
 from test_installer import installerTestBase
-from test_config import *
+from config import *
 from inner import *
 
-class BasicProcessTests(installerTestBase):
+class UI(installerTestBase):
     """ basic process for installer """
 
-    def _test_single_udisk_installing_with_net_img(self):
+    def test_single_udisk_installing_with_net_img(self):
         """ test routine:
                 single udisk installing process with image from network
         """
@@ -232,12 +232,6 @@ class BasicProcessTests(installerTestBase):
         self.app_do_pushbutton_makeit()
         self.app_handle_confirm_build_msg(True)
         self.app_do_move_mouse_2_mainwin()
-        return
-
-    def test_single_udisk_md5_check(self):
-        """ test routine:
-                md5 check for udisk files
-        """
         return
 
     def app_setup(self):
