@@ -3,9 +3,6 @@
 from autopilot.testcase import AutopilotTestCase
 from os.path import abspath, dirname, join
 
-import time
-import logging
-
 class installerTestBase(AutopilotTestCase):
     """ base test for installer which launches keepod-installer """
     
