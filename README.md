@@ -47,7 +47,7 @@ build the keepod-installer from source;
    
     $ cd path/to/source/of/keepod-installer
     
-    $ ./build-nonstatic
+    $ ./build-nostatic
    
 ## Test
 
