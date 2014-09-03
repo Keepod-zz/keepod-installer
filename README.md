@@ -86,7 +86,7 @@ and then we can launch one each time.
 
 * lanch the test we want, we launch **installer.tests.test_basic_process.BasicProcessTests.test_single_udisk_installing_with_local_img** as example:
 
-        $ aupopilot run installer.tests.test_basic_process.BasicProcessTests.test_single_udisk_installing_with_local_img
+        $ autopilot run installer.tests.test_basic_process.BasicProcessTests.test_single_udisk_installing_with_local_img
     
 **Note**:
 
