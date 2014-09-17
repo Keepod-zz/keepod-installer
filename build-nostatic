@@ -18,6 +18,5 @@ lrelease-qt4 unetbootin.pro
 qmake-qt4 -config release "DEFINES += NOSTATIC" "RESOURCES += keepodinstaller.qrc"
 make
 mv unetbootin-pro.bak unetbootin.pro
-strip --strip-all unetbootin
-cp unetbootin keepod-installer
+strip --strip-all bin/keepod-installer
 
